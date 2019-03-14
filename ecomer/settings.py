@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'aplicaciones.empresa',
     'aplicaciones.usuario',
+    'aplicaciones.pedido',
 ]
 
 AUTH_USER_MODEL = 'usuario.User'
@@ -81,8 +82,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecomer',
-        'USER': 'soporte',
-        'PASSWORD': 'S1st3m45',
+        'USER': 'root',
+        'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
     }
