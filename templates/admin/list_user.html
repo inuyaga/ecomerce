@@ -1,0 +1,41 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+<a class="btn btn btn-secondary btn-sm" href="{% url 'usuarios:crear_user' %}" role="button">Añadir</a>
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Usuario</th>
+        <th scope="col">Nombre</th>
+        <th scope="col">Apellido</th>
+        <th scope="col">Correo</th>
+        <th scope="col">Staf</th>
+        <th scope="col">Activo</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Sucursal</th>
+        <th scope="col">Zona</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usr in object_list %}
+      <tr>
+        <th scope="row">{{usr.username}}</th>
+        <th scope="row">{{usr.first_name}}</th>
+        <th scope="row">{{usr.last_name}}</th>
+        <th scope="row">{{usr.email}}</th>
+        <th scope="row">{{usr.is_staff}}</th>
+        <th scope="row">{{usr.is_active}}</th>
+        <th scope="row">{{usr.get_tipo_user_display}}</th>
+        <th scope="row">{{usr.zona_pertene}}</th>
+        <th scope="row">{{usr.suc_pertene}}</th>
+        <td>
+          <a class="btn btn-outline-primary" href="{% url 'usuarios:user_update' usr.id %}" role="button">Editar</a>
+          <a class="btn btn-outline-danger" href="{% url 'empresa:sucursal_delete' usr.id %}" role="button">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+{% endblock contenido %}

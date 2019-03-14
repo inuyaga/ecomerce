@@ -1,0 +1,26 @@
+ {% extends 'admin/base_ecomer.html'%}
+ {% block contenido %}
+<div class="container">
+    <div class="row">
+
+        <div class="card">
+            <div class="card-header">
+                <strong>Usuarios</strong>
+            </div>
+            <div class="card-body card-block">
+                <form action="" method="post" class="">
+                    {% csrf_token %}
+                    {{form.as_p}}
+
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Guardar
+                </button>
+            </div>
+        </form>
+        </div>
+
+    </div>
+</div>
+ {% endblock contenido %}

@@ -1,0 +1,25 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Zona</th>
+        <th scope="col">Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for zona in object_list %}
+      <tr>
+        <th scope="row">{{zona.zona_nombre}}</th>
+        <td>
+          <a class="btn btn-outline-primary" href="{% url 'empresa:zona_edit' zona.id %}" role="button">Editar</a>
+          <a class="btn btn-outline-danger" href="{% url 'empresa:zona_delete' zona.id %}" role="button">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+{% endblock contenido %}

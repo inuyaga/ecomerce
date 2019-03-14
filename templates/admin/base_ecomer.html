@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <!-- Required meta tags-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="au theme template">
+    <meta name="author" content="Hau Nguyen">
+    <meta name="keywords" content="au theme template">
+
+    <!-- Title Page-->
+    {% block titulo %}
+
+    <title>Dashboard</title>
+    {% endblock titulo %}
+
+    <!-- Fontfaces CSS-->
+    <link href="{% static 'css/font-face.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/font-awesome-4.7/css/font-awesome.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/font-awesome-5/css/fontawesome-all.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/mdi-font/css/material-design-iconic-font.min.css' %}" rel="stylesheet" media="all">
+
+    <!-- Bootstrap CSS-->
+    <link href="{% static 'vendor/bootstrap-4.1/bootstrap.min.css' %}" rel="stylesheet %}" media="all">
+
+    <!-- Vendor CSS-->
+    <link href="{% static 'vendor/animsition/animsition.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/bootstrap-progressbar/bootstrap-progressbar-3.3.4.min.css' %}" rel="stylesheet" media="all">
+    <!-- <link href="{% static 'vendor/wow/animate.css' %}" rel="stylesheet %}" media="all"> -->
+    <link href="{% static 'vendor/css-hamburgers/hamburgers.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/slick/slick.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/select2/select2.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/perfect-scrollbar/perfect-scrollbar.css' %}" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="{% static 'css/theme.css' %}" rel="stylesheet" media="all">
+
+</head>
+
+<body class="animsition">
+    <div class="page-wrapper">
+        {% block menu_desktop %}
+          <!-- HEADER DESKTOP-->
+        <header class="header-desktop3 d-none d-lg-block">
+                <div class="section__content section__content--p35">
+                    <div class="header3-wrap">
+                        <div class="header__logo">
+                            <a href="#">
+                                <img src="{% static 'images/icon/logo-white.png' %}" alt="CoolAdmin" />
+                            </a>
+                        </div>
+                        <div class="header__navbar">
+                            <ul class="list-unstyled">
+                                <li class="has-sub">
+                                    <a href="#">
+                                        <i class="fas fa-tachometer-alt"></i>Dashboard
+                                        <span class="bot-line"></span>
+                                    </a>
+                                    <ul class="header3-sub-list list-unstyled">
+                                        <li>
+                                            <a href="index.html">Dashboard 1</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="has-sub">
+                                    <a href="#">
+                                        <i class="fas fa-shopping-cart"></i>Pedido
+                                        <span class="bot-line"></span>
+                                    </a>
+                                    <ul class="header3-sub-list list-unstyled">
+                                        <li>
+                                            <a href="index.html">Ver</a>
+                                        </li>
+                                        <li>
+                                            <a href="index.html">Crear</a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+
+                                <li class="has-sub">
+                                    <a href="#">
+                                        <i class="fas fa-map-marker"></i>
+                                        <span class="bot-line"></span>Zonas</a>
+                                    <ul class="header3-sub-list list-unstyled">
+                                        <li>
+                                            <a href="{% url 'empresa:crear_zona' %}">Crear</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'empresa:list_zona' %}">Ver</a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                                <li class="has-sub">
+                                    <a href="#">
+                                        <i class="fas fa-building"></i>
+                                        <span class="bot-line"></span>Sucursales</a>
+                                    <ul class="header3-sub-list list-unstyled">
+                                        <li>
+                                            <a href="{% url 'empresa:sucursal_crear' %}">Crear</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'empresa:list_sucursales' %}">Ver</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="header__tool">
+                            <div class="header-button-item has-noti js-item-menu">
+                                <i class="zmdi zmdi-notifications"></i>
+                                <div class="notifi-dropdown notifi-dropdown--no-bor js-dropdown">
+                                    <!-- <div class="notifi__title">
+                                        <p>You have 3 Notifications</p>
+                                    </div>
+                                    <div class="notifi__item">
+                                        <div class="bg-c1 img-cir img-40">
+                                            <i class="zmdi zmdi-email-open"></i>
+                                        </div>
+                                        <div class="content">
+                                            <p>You got a email notification</p>
+                                            <span class="date">April 12, 2018 06:50</span>
+                                        </div>
+                                    </div> -->
+                                </div>
+                            </div>
+
+                            <div class="account-wrap">
+                                <div class="account-item account-item--style2 clearfix js-item-menu">
+                                    <div class="image">
+                                        <img src="images/icon/avatar-01.jpg" alt="{{usuario}}" />
+                                    </div>
+                                    <div class="content">
+                                        <a class="js-acc-btn" href="#">{{usuario}}</a>
+                                    </div>
+                                    <div class="account-dropdown js-dropdown">
+                                        <div class="info clearfix">
+                                            <!-- <div class="image">
+                                                <a href="#">
+                                                    <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                                </a>
+                                            </div> -->
+                                            <div class="content">
+                                                <h5 class="name">
+                                                    <a href="#">{{usuario.first_name}}</a>
+                                                </h5>
+                                                <span class="email">{{usuario.email}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="account-dropdown__body">
+                                            <div class="account-dropdown__item">
+                                                <a href="#">
+                                                    <i class="zmdi zmdi-account"></i>Cuenta</a>
+                                            </div>
+
+                                            <div class="account-dropdown__item">
+                                                <a href="{% url 'usuarios:list_user' %}">
+                                                    <i class="zmdi zmdi-account"></i>Usuarios</a>
+                                            </div>
+
+                                        </div>
+                                        <div class="account-dropdown__footer">
+                                            <a href="{% url 'salir' %}">
+                                                <i class="zmdi zmdi-power"></i>Salir</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- END HEADER DESKTOP-->
+        {% endblock menu_desktop %}
+        <!-- PAGE CONTENT-->
+        <div class="page-content--bgf7">
+            {% block contenido %}
+
+            {% endblock contenido %}
+
+
+        </div>
+
+
+
+    </div>
+
+    <!-- Jquery JS-->
+    <script src="{% static 'vendor/jquery-3.2.1.min.js' %}"></script>
+    <!-- Bootstrap JS-->
+    <script src="{% static 'vendor/bootstrap-4.1/popper.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap-4.1/bootstrap.min.js' %}"></script>
+    <!-- Vendor JS       -->
+    <script src="{% static 'vendor/slick/slick.min.js' %}">
+    </script>
+    <script src="{% static 'vendor/wow/wow.min.js' %}"></script>
+    <script src="{% static 'vendor/animsition/animsition.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap-progressbar/bootstrap-progressbar.min.js' %}">
+    </script>
+    <script src="{% static 'vendor/counter-up/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'vendor/counter-up/jquery.counterup.min.js' %}">
+    </script>
+    <script src="{% static 'vendor/circle-progress/circle-progress.min.js' %}"></script>
+    <script src="{% static 'vendor/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'vendor/chartjs/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/select2/select2.min.js' %}">
+    </script>
+
+    <!-- Main JS-->
+    <script src="{% static 'js/main.js' %}"></script>
+
+</body>
+
+</html>
+<!-- end document-->

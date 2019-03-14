@@ -1,0 +1,31 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Nombre</th>
+        <th scope="col">Zona</th>
+        <th scope="col">Monto papeleria</th>
+        <th scope="col">Monto limpieza</th>
+        <th scope="col">Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for suc in object_list %}
+      <tr>
+        <th scope="row">{{suc.suc_nombre}}</th>
+        <th scope="row">{{suc.suc_zona}}</th>
+        <th scope="row">{{suc.suc_monto_papeleria}}</th>
+        <th scope="row">{{suc.suc_monto_limpieza}}</th>
+        <td>
+          <a class="btn btn-outline-primary" href="{% url 'empresa:sucursal_update' suc.suc_id %}" role="button">Editar</a>
+          <a class="btn btn-outline-danger" href="{% url 'empresa:sucursal_delete' suc.suc_id %}" role="button">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+{% endblock contenido %}

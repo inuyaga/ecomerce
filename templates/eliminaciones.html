@@ -1,0 +1,48 @@
+{% extends 'admin/base_ecomer.html'%}
+
+{% block titulo %}
+<title>Eliminación</title>
+{% endblock titulo %}
+{% block contenido %}
+<div class="container">
+  <form method="post">
+    {% csrf_token %}
+    <div class="alert alert-danger" role="alert">
+      Esta seguro de eliminar {{ object }}?.
+    </div>
+    <input class="btn btn-danger" type="submit" value="Si estoy seguro!">
+    <a class="btn btn-primary" href="#" onClick="javascript:history.go(-1);" role="button">Cancelar</a>
+  </form>
+
+
+  <table class="table">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Cantidad</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for model_name, object_count in model_count %}
+        <tr>
+          <td>{{ model_name|capfirst }}</td>
+          <td>{{ object_count }}</td>
+        </tr>
+      {% endfor %}
+      <tr>
+        <td>
+          <p>
+            <ul>
+              {{ deletable_objects|unordered_list }}
+            </ul>
+          </p>
+        </td>
+      </tr>
+
+      </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}
