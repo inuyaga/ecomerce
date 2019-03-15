@@ -13,4 +13,7 @@ urlpatterns = [
     path('sucursales/update/<int:pk>/', views.SucursalUpdate.as_view(), name='sucursal_update'),
     path('sucursales/delete/<int:pk>/', views.SucursalDelete.as_view(), name='sucursal_delete'),
 
+
+    path('crear/detalle/pedido/', views.DetallePedidoCreate.as_view(), name='detl_pedido_crear'),
+
 ]

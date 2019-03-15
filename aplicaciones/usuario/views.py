@@ -6,6 +6,8 @@ from aplicaciones.usuario.forms import UserForm, UserFormEdit
 from aplicaciones.usuario.models import User
 from django.contrib.auth.admin import UserAdmin
 from django.views.generic import CreateView, ListView, UpdateView
+from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 # Create your views here.
 
 class CreateUser(LoginRequiredMixin, CreateView):
@@ -21,6 +23,10 @@ class CreateUser(LoginRequiredMixin, CreateView):
         context['usuario']=self.request.user
         return context
 
+    @method_decorator(permission_required('usuario.add_user',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(CreateUser, self).dispatch(*args, **kwargs)
+
 class UsuarioList(LoginRequiredMixin, ListView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
@@ -31,6 +37,10 @@ class UsuarioList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    @method_decorator(permission_required('usuario.view_user',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(UsuarioList, self).dispatch(*args, **kwargs)
 
 class UsuarioUpdate(LoginRequiredMixin, UpdateView):
     login_url = '/login/'
@@ -44,6 +54,10 @@ class UsuarioUpdate(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    @method_decorator(permission_required('usuario.change_user',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(UsuarioUpdate, self).dispatch(*args, **kwargs)
 
 
 

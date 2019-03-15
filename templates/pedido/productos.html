@@ -2,37 +2,41 @@
 {% block contenido %}
 <div class="container">
 <div class="row">
-    <button type="button" class="btn btn-outline-dark">Dar de alta a nuevo producto</button>
+    <a href="{% url 'pedido:crear_producto' %}" class="btn btn-outline-dark">Dar de alta a nuevo producto</a>
 </div>
 <div class="row">
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
+                <th scope="col">Codigo</th>
+                <th scope="col">Descripcion</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Status</th>
             </tr>
         </thead>
         <tbody>
+        {% for prod in object_list %}
             <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
+                <th scope="row">
+                <a href="{% url 'pedido:changue_producto' prod.id %}">{{prod.prod_codigo}}</a>
+
+                </th>
+                <td>{{prod.prod_descripcion}}</td>
+                <td>{{prod.prod_precio}}</td>
+                <td>{{prod.get_prod_tipo_display}}</td>
+                <td>
+                {% if prod.prod_estado_producto %}
+                <i class="far fa-thumbs-up"></i>
+                {% else %}
+                <i class="far fa-thumbs-down"></i>
+                {% endif %}
+                </td>
+                <td>
+                    <a class="btn btn-danger" href="{% url 'pedido:delete_producto' prod.id %}" role="button">Eliminar</a>
+                </td>
             </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-        <td>the Bird</td>
-        <td>@twitter</td>
-    </tr>
+        {% endfor %}
 </tbody>
 </table>
 </div><!--fin fil-->

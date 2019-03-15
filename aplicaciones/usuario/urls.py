@@ -1,6 +1,7 @@
 
 from django.urls import path, include
 from aplicaciones.usuario import views
+
 app_name='usuarios'
 urlpatterns = [
     path('crear_usuario/',views.CreateUser.as_view(),name='crear_user' ),

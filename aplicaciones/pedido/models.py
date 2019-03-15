@@ -3,8 +3,8 @@ from aplicaciones.empresa.models import Sucursal
 from aplicaciones.usuario.models import User
 
 class Producto(models.Model):
-    prod_codigo = models.CharField('código del producto', max_length=11)
-    prod_rutaimg=models.ImageField("imagen", upload_to="imgPrductos/", height_field=None, width_field=None, max_length=None)
+    prod_codigo = models.CharField('código del producto', max_length=11, unique=True)
+    prod_rutaimg=models.ImageField("imagen", upload_to="imgPrductos/")
     prod_descripcion=models.CharField('Descripción del producto', max_length=400)
     prod_precio=models.FloatField("Precio de producto")
     TIPOPRODUCTO=((1,"Papeleria"),(2,"Limpieza"))
@@ -32,13 +32,15 @@ class Pedido(models.Model):
 
 class DetallePedido(models.Model):
     dtl_id_detalle=models.AutoField(primary_key=True)
-    dtl_id_pedido=models.ForeignKey(Pedido, verbose_name="Folio Pedido", on_delete=models.CASCADE)
+    dtl_id_pedido=models.ForeignKey(Pedido, verbose_name="Folio Pedido", blank=True, null=True, on_delete=models.CASCADE)
     dtl_cantidad=models.IntegerField("Cantidad de producto")
     dtl_codigo = models.CharField('código del producto', max_length=11)
     dtl_descripcion=models.CharField('Descripción del producto', max_length=400)
     dtl_precio=models.FloatField("Precio de producto")
     TIPOPRODUCTO=((1,"Papeleria"),(2,"Limpieza"))
     dtl_tipo=models.IntegerField(choices=TIPOPRODUCTO)
+    dtl_creado_por = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    dtl_status=models.BooleanField('status', default=False)
+
     def __str__(self):
         return str(self.dtl_id_detalle)
-    

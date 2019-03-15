@@ -36,101 +36,103 @@
 
     <!-- Main CSS-->
     <link href="{% static 'css/theme.css' %}" rel="stylesheet" media="all">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
 
 </head>
 
 <body class="animsition">
     <div class="page-wrapper">
         {% block menu_desktop %}
-          <!-- HEADER DESKTOP-->
+        <!-- HEADER DESKTOP-->
         <header class="header-desktop3 d-none d-lg-block">
-                <div class="section__content section__content--p35">
-                    <div class="header3-wrap">
-                        <div class="header__logo">
-                            <a href="{% url 'index' %}">
-                                <img src="{% static 'images/icon/logo-white.png' %}" alt="CoolAdmin" />
-                            </a>
-                        </div>
-                        <div class="header__navbar">
-                            <ul class="list-unstyled">
-                                <li class="has-sub">
-                                    <a href="#">
-                                        <i class="fas fa-tachometer-alt"></i>Dashboard
-                                        <span class="bot-line"></span>
-                                    </a>
-                                    <ul class="header3-sub-list list-unstyled">
-                                        <li>
-                                            <a href="index.html">Dashboard 1</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="has-sub">
-                                    <a href="#">
-                                        <i class="fas fa-shopping-cart"></i>Pedido
-                                        <span class="bot-line"></span>
-                                    </a>
-                                    <ul class="header3-sub-list list-unstyled">
-                                        {% if perms.pedido.view_producto %}
-                                        <li>
-                                            <a href="{% url 'pedido:ProductoLista' %}">Productos</a>
-                                        </li>
-                                        {% endif %}
-                                        {% if perms.pedido.view_pedido %}
-                                        <li>
-                                            <a href="index.html">Pedidos</a>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </li>
+            <div class="section__content section__content--p35">
+                <div class="header3-wrap">
+                    <div class="header__logo">
+                        <a href="{% url 'index' %}">
+                            <img src="{% static 'images/icon/logo-white.png' %}" alt="CoolAdmin" />
+                        </a>
+                    </div>
+                    <div class="header__navbar">
+                        <ul class="list-unstyled">
+                            <li class="has-sub">
+                                <a href="#">
+                                    <i class="fas fa-tachometer-alt"></i>Dashboard
+                                    <span class="bot-line"></span>
+                                </a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    <li>
+                                        <a href="index.html">Dashboard 1</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="has-sub">
+                                <a href="#">
+                                    <i class="fas fa-shopping-cart"></i>Pedido
+                                    <span class="bot-line"></span>
+                                </a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    {% if perms.pedido.view_producto %}
+                                    <li>
+                                        <a href="{% url 'pedido:ProductoLista' %}">Productos</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.pedido.view_pedido %}
+                                    <li>
+                                        <a href="{% url 'pedido:listar_pedido' %}">Pedidos</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
 
-                                {% if perms.empresa %}
-                                <li class="has-sub">
-                                    <a href="#">
-                                        <i class="fas fa-map-marker"></i>
-                                        <span class="bot-line"></span>Zonas</a>
-                                    <ul class="header3-sub-list list-unstyled">
-                                        {% if perms.empresa.add_zona %}
-                                        <li>
-                                            <a href="{% url 'empresa:crear_zona' %}">Crear</a>
-                                        </li>
-                                        {% endif %}
-                                        {% if perms.empresa.view_zona %}
-                                        <li>
-                                            <a href="{% url 'empresa:list_zona' %}">Ver</a>
-                                        </li>
-                                        {% endif %}
+                            {% if perms.empresa %}
+                            <li class="has-sub">
+                                <a href="#">
+                                    <i class="fas fa-map-marker"></i>
+                                    <span class="bot-line"></span>Zonas</a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    {% if perms.empresa.add_zona %}
+                                    <li>
+                                        <a href="{% url 'empresa:crear_zona' %}">Crear</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.empresa.view_zona %}
+                                    <li>
+                                        <a href="{% url 'empresa:list_zona' %}">Ver</a>
+                                    </li>
+                                    {% endif %}
 
-                                    </ul>
-                                </li>
-                                {% endif %}
+                                </ul>
+                            </li>
+                            {% endif %}
 
-                                {% if perms.empresa %}
-                                <li class="has-sub">
-                                    <a href="#">
-                                        <i class="fas fa-building"></i>
-                                        <span class="bot-line"></span>Sucursales</a>
-                                    <ul class="header3-sub-list list-unstyled">
-                                        {% if perms.empresa.add_sucursal %}
-                                        <li>
-                                            <a href="{% url 'empresa:sucursal_crear' %}">Crear</a>
-                                        </li>
-                                        {% endif %}
+                            {% if perms.empresa %}
+                            <li class="has-sub">
+                                <a href="#">
+                                    <i class="fas fa-building"></i>
+                                    <span class="bot-line"></span>Sucursales</a>
+                                <ul class="header3-sub-list list-unstyled">
+                                    {% if perms.empresa.add_sucursal %}
+                                    <li>
+                                        <a href="{% url 'empresa:sucursal_crear' %}">Crear</a>
+                                    </li>
+                                    {% endif %}
 
-                                        {% if perms.empresa.view_sucursal %}
-                                        <li>
-                                            <a href="{% url 'empresa:list_sucursales' %}">Ver</a>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </li>
-                                {% endif %}
-                            </ul>
-                        </div>
-                        <div class="header__tool">
-                            <div class="header-button-item has-noti js-item-menu">
-                                <i class="zmdi zmdi-notifications"></i>
-                                <div class="notifi-dropdown notifi-dropdown--no-bor js-dropdown">
-                                    <!-- <div class="notifi__title">
+                                    {% if perms.empresa.view_sucursal %}
+                                    <li>
+                                        <a href="{% url 'empresa:list_sucursales' %}">Ver</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="header__tool">
+                        <div class="header-button-item has-noti js-item-menu">
+                            <i class="zmdi zmdi-notifications"></i>
+                            <div class="notifi-dropdown notifi-dropdown--no-bor js-dropdown">
+                                <!-- <div class="notifi__title">
                                         <p>You have 3 Notifications</p>
                                     </div>
                                     <div class="notifi__item">
@@ -142,61 +144,125 @@
                                             <span class="date">April 12, 2018 06:50</span>
                                         </div>
                                     </div> -->
-                                </div>
                             </div>
+                        </div>
 
-                            <div class="account-wrap">
-                                <div class="account-item account-item--style2 clearfix js-item-menu">
-                                    <div class="image">
-                                        <img src="{% static 'images/256-512.png' %}" alt="{{usuario}}" />
-                                    </div>
-                                    <div class="content">
-                                        <a class="js-acc-btn" href="#">{{usuario}}</a>
-                                    </div>
-                                    <div class="account-dropdown js-dropdown">
-                                        <div class="info clearfix">
-                                            <div class="image">
-                                                <a href="#">
-                                                    <img src="{% static 'images/256-512.png' %}" alt="John Doe" />
-                                                </a>
-                                            </div>
-                                            <div class="content">
-                                                <h5 class="name">
-                                                    <a href="#">{{usuario.first_name}}</a>
-                                                </h5>
-                                                <span class="email">{{usuario.email}}</span>
-                                            </div>
+                        <div class="account-wrap">
+                            <div class="account-item account-item--style2 clearfix js-item-menu">
+                                <div class="image">
+                                    <img src="{% static 'images/256-512.png' %}" alt="{{usuario}}" />
+                                </div>
+                                <div class="content">
+                                    <a class="js-acc-btn" href="#">{{usuario}}</a>
+                                </div>
+                                <div class="account-dropdown js-dropdown">
+                                    <div class="info clearfix">
+                                        <div class="image">
+                                            <a href="#">
+                                                <img src="{% static 'images/256-512.png' %}" alt="John Doe" />
+                                            </a>
                                         </div>
-                                        <div class="account-dropdown__body">
-                                                {% if usuario.is_superuser %}
-                                                <div class="account-dropdown__item">
-                                                    <a href="{% url 'usuarios:list_user' %}">
-                                                        <i class="zmdi zmdi-account"></i>Usuarios</a>
-                                                </div>
-                                                {% endif %}
+                                        <div class="content">
+                                            <h5 class="name">
+                                                <a href="#">{{usuario.first_name}}</a>
+                                            </h5>
+                                            <span class="email">{{usuario.email}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="account-dropdown__body">
+                                        {% if usuario.is_superuser %}
+                                        <div class="account-dropdown__item">
+                                            <a href="{% url 'usuarios:list_user' %}">
+                                                <i class="zmdi zmdi-account"></i>Usuarios</a>
+                                        </div>
+                                        {% endif %}
 
-                                        </div>
-                                        <div class="account-dropdown__footer">
-                                            <a href="{% url 'salir' %}">
-                                                <i class="zmdi zmdi-power"></i>Salir</a>
-                                        </div>
+                                    </div>
+                                    <div class="account-dropdown__footer">
+                                        <a href="{% url 'salir' %}">
+                                            <i class="zmdi zmdi-power"></i>Salir</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </header>
-            <!-- END HEADER DESKTOP-->
+            </div>
+        </header>
+        <!-- END HEADER DESKTOP-->
         {% endblock menu_desktop %}
         <!-- PAGE CONTENT-->
         <div class="page-content--bgf7">
             {% block contenido %}
 
+            {% if usuario.suc_pertene is None %}
+            <div class="container">
+                <br>
+                <h4 class="text-danger">Usuario sin una sucursal asignada, contacte al administrador del sistema para
+                    poder hacer pedidos</h4>
+            </div>
+            {% else %}
+            <div class="row">
+                {% for producto in object_list %}
+
+                <div class="col-3">
+                    <div class="card" style="width: 18rem;">
+                        <img src="{{ producto.prod_rutaimg.url }}" class="card-img-top" width="50" height="250" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">{{producto.prod_codigo}}</h5>
+                            <p class="card-text">{{producto.prod_descripcion}}</p>
+
+                            <div class="form-group col-md-12 row justify-content-md-center">
+                                <label for="inputEmail4">Cantidad</label>
+                                <input type="number" id="{{producto.prod_codigo}}" class="form-control" min="1"
+                                    value="1">
+                            </div>
+                            <div class="row justify-content-md-center">
+                                <button type="button" onclick="agregar('{{producto.prod_codigo}}')" class="btn btn-primary">Agregar</button>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+            {% endif %}
+
+
+            <div class="row justify-content-md-center">
+                {% if is_paginated %}
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}"><i
+                                    class="material-icons">
+                                    navigate_before
+                                </i></a></li>
+                        {% endif %}
+                        <span class="page-link">
+                            Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                            <span class="sr-only">(current)</span>
+                        </span>
+                        {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}"><i
+                                    class="material-icons">
+                                    navigate_next
+                                </i></a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+
+
+
             {% endblock contenido %}
-
-
         </div>
+
+
+    </div>
 
 
 
@@ -220,11 +286,43 @@
     <script src="{% static 'vendor/circle-progress/circle-progress.min.js' %}"></script>
     <script src="{% static 'vendor/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
     <script src="{% static 'vendor/chartjs/Chart.bundle.min.js' %}"></script>
-    <script src="{% static 'vendor/select2/select2.min.js' %}">
-    </script>
+    <script src="{% static 'vendor/select2/select2.min.js' %}"></script>
+    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/alertify.min.js"></script>
 
     <!-- Main JS-->
     <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+
+        function agregar(codigo) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'empresa:detl_pedido_crear' %}",
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    dtl_codigo: codigo,
+                    dtl_cantidad: $('#' + codigo).val()
+                },
+                success: function (data) {
+                    var message = data.content.mensaje
+                    // var contado = data.content.conteo
+                    var tipo_mensaje = data.content.tipo_mensaje
+                    if (tipo_mensaje) {
+                        alertify.success(message);
+                    } else {
+                        alertify.error(message);
+                    }
+                    // $('#conteo').replaceWith('<span class="badge badge-light" id="conteo">' + contado +
+                    //     '</span>');
+
+                },
+                error: function (data) {
+                    console.log('An error occurred.');
+                    console.log(data);
+                },
+            });
+        }
+    </script>
 
 </body>
 
