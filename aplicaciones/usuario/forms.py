@@ -14,10 +14,13 @@ class UserForm(UserCreationForm):
 class UserFormEdit(forms.ModelForm):
     class Meta:
         model = User
-        exclude = ['password', 'last_login', 'date_joined']
+        exclude = ['password', 'last_login', 'date_joined', 'is_staff']
 
     def __init__(self, *args, **kwargs):
         super(UserFormEdit, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
         self.fields['username'].widget.attrs['readonly'] = True
+        # self.fields['is_superuser'].widget.attrs.update({'class': 'form-check-input'})
+        # self.fields['is_staff'].widget.attrs.update({'class': 'form-check-input'})
+        # self.fields['is_active'].widget.attrs.update({'class': 'form-check-input'})

@@ -79,7 +79,7 @@
                                     </ul>
                                 </li>
 
-
+                                {% if usuario.is_superuser %}
                                 <li class="has-sub">
                                     <a href="#">
                                         <i class="fas fa-map-marker"></i>
@@ -94,6 +94,8 @@
 
                                     </ul>
                                 </li>
+                                {% endif %}
+                                {% if usuario.is_superuser %}
                                 <li class="has-sub">
                                     <a href="#">
                                         <i class="fas fa-building"></i>
@@ -107,6 +109,7 @@
                                         </li>
                                     </ul>
                                 </li>
+                                {% endif %}
                             </ul>
                         </div>
                         <div class="header__tool">
@@ -131,18 +134,18 @@
                             <div class="account-wrap">
                                 <div class="account-item account-item--style2 clearfix js-item-menu">
                                     <div class="image">
-                                        <img src="images/icon/avatar-01.jpg" alt="{{usuario}}" />
+                                        <img src="{% static 'images/256-512.png' %}" alt="{{usuario}}" />
                                     </div>
                                     <div class="content">
                                         <a class="js-acc-btn" href="#">{{usuario}}</a>
                                     </div>
                                     <div class="account-dropdown js-dropdown">
                                         <div class="info clearfix">
-                                            <!-- <div class="image">
+                                            <div class="image">
                                                 <a href="#">
-                                                    <img src="images/icon/avatar-01.jpg" alt="John Doe" />
+                                                    <img src="{% static 'images/256-512.png' %}" alt="John Doe" />
                                                 </a>
-                                            </div> -->
+                                            </div>
                                             <div class="content">
                                                 <h5 class="name">
                                                     <a href="#">{{usuario.first_name}}</a>
@@ -151,15 +154,12 @@
                                             </div>
                                         </div>
                                         <div class="account-dropdown__body">
-                                            <div class="account-dropdown__item">
-                                                <a href="#">
-                                                    <i class="zmdi zmdi-account"></i>Cuenta</a>
-                                            </div>
-
-                                            <div class="account-dropdown__item">
-                                                <a href="{% url 'usuarios:list_user' %}">
-                                                    <i class="zmdi zmdi-account"></i>Usuarios</a>
-                                            </div>
+                                                {% if usuario.is_superuser %}
+                                                <div class="account-dropdown__item">
+                                                    <a href="{% url 'usuarios:list_user' %}">
+                                                        <i class="zmdi zmdi-account"></i>Usuarios</a>
+                                                </div>
+                                                {% endif %}
 
                                         </div>
                                         <div class="account-dropdown__footer">

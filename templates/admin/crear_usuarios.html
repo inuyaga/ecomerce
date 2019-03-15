@@ -3,14 +3,22 @@
 <div class="container">
     <div class="row">
 
-        <div class="card">
+        <div class="card col-sm-9">
             <div class="card-header">
                 <strong>Usuarios</strong>
             </div>
             <div class="card-body card-block">
                 <form action="" method="post" class="">
                     {% csrf_token %}
-                    {{form.as_p}}
+                    {% for input in form %}
+                    <div class="form-group">
+                        {{input.label}}
+                        {{input.errors}}
+                        {{input}}
+                        {{input.help_text}}
+                    </div>
+                    {% endfor %}
+                    {% comment %} {{form.as_p}} {% endcomment %}
 
             </div>
             <div class="card-footer">
