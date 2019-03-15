@@ -47,7 +47,7 @@
                 <div class="section__content section__content--p35">
                     <div class="header3-wrap">
                         <div class="header__logo">
-                            <a href="#">
+                            <a href="{% url 'index' %}">
                                 <img src="{% static 'images/icon/logo-white.png' %}" alt="CoolAdmin" />
                             </a>
                         </div>
@@ -70,43 +70,57 @@
                                         <span class="bot-line"></span>
                                     </a>
                                     <ul class="header3-sub-list list-unstyled">
+                                        {% if perms.pedido.view_producto %}
                                         <li>
                                             <a href="{% url 'pedido:ProductoLista' %}">Productos</a>
                                         </li>
+                                        {% endif %}
+                                        {% if perms.pedido.view_pedido %}
                                         <li>
                                             <a href="index.html">Pedidos</a>
                                         </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
 
-                                {% if usuario.is_superuser %}
+                                {% if perms.empresa %}
                                 <li class="has-sub">
                                     <a href="#">
                                         <i class="fas fa-map-marker"></i>
                                         <span class="bot-line"></span>Zonas</a>
                                     <ul class="header3-sub-list list-unstyled">
+                                        {% if perms.empresa.add_zona %}
                                         <li>
                                             <a href="{% url 'empresa:crear_zona' %}">Crear</a>
                                         </li>
+                                        {% endif %}
+                                        {% if perms.empresa.view_zona %}
                                         <li>
                                             <a href="{% url 'empresa:list_zona' %}">Ver</a>
                                         </li>
+                                        {% endif %}
 
                                     </ul>
                                 </li>
                                 {% endif %}
-                                {% if usuario.is_superuser %}
+
+                                {% if perms.empresa %}
                                 <li class="has-sub">
                                     <a href="#">
                                         <i class="fas fa-building"></i>
                                         <span class="bot-line"></span>Sucursales</a>
                                     <ul class="header3-sub-list list-unstyled">
+                                        {% if perms.empresa.add_sucursal %}
                                         <li>
                                             <a href="{% url 'empresa:sucursal_crear' %}">Crear</a>
                                         </li>
+                                        {% endif %}
+
+                                        {% if perms.empresa.view_sucursal %}
                                         <li>
                                             <a href="{% url 'empresa:list_sucursales' %}">Ver</a>
                                         </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                                 {% endif %}
