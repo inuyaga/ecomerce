@@ -1,0 +1,31 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Códido</th>
+      <th scope="col">Descripción</th>
+      <th scope="col">Cantidad</th>
+      <th scope="col">Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for dato in  object_list%}
+    <tr>
+      <th scope="row">{{ dato.dtl_codigo}}</th>
+      <td>{{ dato.dtl_descripcion}}</td>
+      <td>{{ dato.dtl_cantidad}}</td>
+      <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}" role="button">Eliminar</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if object_list  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Confirmar pedido!</button>
+</form>
+{% endif %}
+{% endblock contenido %}
+
+

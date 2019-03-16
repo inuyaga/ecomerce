@@ -1,4 +1,36 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">No. Pedido</th>
+      <th scope="col">Fecha Pedido</th>
+      <th scope="col">fecha Autorización</th>
+      <th scope="col">Sucursal</th>
+      <th scope="col">Zona</th>
+      <th scope="col">Usuario</th>
+      <th scope="col">Autorizó</th>
+      <th scope="col">Estatus</th>
+      <th scope="col">Excel</th>
+      {% comment %} <th scope="col">Acción</th> {% endcomment %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for dato in  object_list%}
+    <tr>
+      <th scope="row">{{ dato.ped_id_ped}}</th>
+      <td>{{ dato.ped_fechaCreacion}}</td>
+      <td>{{ dato.ped_fechaAutorizacion}}</td>
+      <td>{{ dato.ped_id_Suc}}</td>
+      <td>{{ dato.ped_id_Suc.suc_zona}}</td>
+      <td>{{ dato.ped_id_UsuarioCreo}}</td>
+      <td>{{ dato.ped_id_UsuarioAutorizo}}</td>
+      <td>{{ dato.get_ped_estatusPedido_display}}</td>
+      <td><button>Excel</button></td>
+      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}" role="button">Eliminar</a></td> {% endcomment %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
 
 {% endblock contenido %}

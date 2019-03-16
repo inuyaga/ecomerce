@@ -51,7 +51,7 @@ class DetallePedidoCreate(TemplateView):
             print('papeleria')
             # cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user).aggregate(suma_total=Sum(F('dtl_cantidad') * F('dtl_precio')))
 
-            cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=1).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+            cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
 
             if cuenta_now_papeleria['suma_total'] == None:
                 cuenta_now_papeleria['suma_total']=0
@@ -70,13 +70,13 @@ class DetallePedidoCreate(TemplateView):
                 mensaje='OK'
                 tipo_mensaje=True
             else:
-                mensaje='Supera el maximo permitido para papeleria'
+                mensaje='Supera el máximo permitido para papeleria'
                 tipo_mensaje=False
 
         else:
-            cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=2).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+            cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
             if cuenta_now_limpieza['suma_total'] == None:
-                cuenta_now_limpieza['suma_total']==0
+                cuenta_now_limpieza['suma_total']=0
             cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
             if cutn_tem_limpieza <= maximo_limpieza:
                 det_pedido=DetallePedido(
@@ -91,7 +91,7 @@ class DetallePedidoCreate(TemplateView):
                 mensaje='OK'
                 tipo_mensaje=True
             else:
-                mensaje='Supera el maximo permitido para limpieza'
+                mensaje='Supera el máximo permitido para limpieza'
                 tipo_mensaje=False
 
 
