@@ -3,30 +3,61 @@
 <table class="table">
   <thead class="thead-dark">
     <tr>
-      <th scope="col">No. Pedido</th>
-      <th scope="col">Fecha Pedido</th>
-      <th scope="col">fecha Autorización</th>
-      <th scope="col">Sucursal</th>
-      <th scope="col">Zona</th>
-      <th scope="col">Usuario</th>
-      <th scope="col">Autorizó</th>
-      <th scope="col">Estatus</th>
-      <th scope="col">Excel</th>
+      <th scope="col"><small>No. Pedido</small></th>
+      <th scope="col"><small>Fecha Pedido</small></th>
+      <th scope="col"><small>fecha Autorización</small></th>
+      <th scope="col"><small>Sucursal</small></th>
+      <th scope="col"><small>Zona</small></th>
+      <th scope="col"><small>Usuario</small></th>
+      <th scope="col"><small>Autorizó</small></th>
+      <th scope="col"><small>Estatus</small></th>
+      <th scope="col"><small>Factura</small></th>
+      <th scope="col"><small>Excel</small></th>
       {% comment %} <th scope="col">Acción</th> {% endcomment %}
     </tr>
   </thead>
   <tbody>
   {% for dato in  object_list%}
     <tr>
-      <th scope="row">{{ dato.ped_id_ped}}</th>
-      <td>{{ dato.ped_fechaCreacion}}</td>
-      <td>{{ dato.ped_fechaAutorizacion}}</td>
-      <td>{{ dato.ped_id_Suc}}</td>
-      <td>{{ dato.ped_id_Suc.suc_zona}}</td>
-      <td>{{ dato.ped_id_UsuarioCreo}}</td>
-      <td>{{ dato.ped_id_UsuarioAutorizo}}</td>
-      <td>{{ dato.get_ped_estatusPedido_display}}</td>
-      <td><button>Excel</button></td>
+      <th scope="row"><small>{{ dato.ped_id_ped}}</small></th>
+      <td><small>{{ dato.ped_fechaCreacion}}</small></td>
+      <td><small>{{ dato.ped_fechaAutorizacion}}</small></td>
+      <td><small>{{ dato.ped_id_Suc}}</small></td>
+      <td><small>{{ dato.ped_id_Suc.suc_zona}}</small></td>
+      <td><small>{{ dato.ped_id_UsuarioCreo}}</small></td>
+      <td><small>{{ dato.ped_id_UsuarioAutorizo}}</small></td>
+      <td><small>{{ dato.get_ped_estatusPedido_display}}</small></td>
+      <td>
+      {% if dato.ped_estatusPedido == 3 %}
+      <a href="{{dato.ped_pdffac.url}}">PDF</a>
+      <a href="{{dato.ped_xmlfac.url}}">XML</a>
+      {% endif %}
+
+      </td>
+
+      <td>
+          <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}" title="Ver productos" role="button">
+              <i class="material-icons">remove_red_eye</i>
+            </a>
+          <a class="btn btn-primary btn-sm" href="{% url 'pedido:pedido_info' dato.ped_id_ped  %}" title="Ver productos" role="button">
+              <i class="material-icons">info</i>
+            </a>
+
+        {% if dato.ped_estatusPedido == 1 %}
+        <a class="btn btn-success btn-sm" href="{% url 'pedido:auto_pedido' dato.ped_id_ped %}" title="Autorizar" role="button"><i class="material-icons">thumb_up</i></a>
+        <a class="btn btn-danger btn-sm" href="{% url 'pedido:rechaza_pedido' dato.ped_id_ped %}" title="Rechazar" role="button"><i class="material-icons">thumb_down</i></a>
+        {% endif %}
+
+        {% if dato.ped_estatusPedido == 2 %}
+        <a class="btn btn-secondary btn-sm" target="_blank" title="Excel" href="{% url 'pedido:descarga_pedido' dato.ped_id_ped %}" role="button">
+            <i class="material-icons">cloud_download</i>
+            </a>
+        <a class="btn btn-success btn-sm" title="subir factura" href="{% url 'pedido:pedido_update' dato.ped_id_ped %}" role="button">
+            <i class="material-icons">cloud_upload</i>
+            </a>
+        {% endif %}
+
+      </td>
       {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}" role="button">Eliminar</a></td> {% endcomment %}
     </tr>
   {% endfor %}

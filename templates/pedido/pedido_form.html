@@ -1,0 +1,33 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+
+        <div class="card col-sm-7">
+            <div class="card-header">
+                <strong>Pedido</strong>
+            </div>
+            <div class="card-body card-block">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for input in form %}
+                    <div class="form-group">
+                        {{input.label}}
+                        {{input.errors}}
+                        {{input}}
+                        {{input.help_text}}
+                    </div>
+                    {% endfor %}
+
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa fa-dot-circle-o"></i> Guardar
+                </button>
+            </div>
+        </form>
+        </div>
+
+    </div>
+</div>
+{% endblock contenido %}

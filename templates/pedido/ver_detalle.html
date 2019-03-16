@@ -1,0 +1,23 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Codigo</th>
+      <th scope="col">Descripcion</th>
+      <th scope="col">Cantidad</th>
+      <th scope="col">Accion</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for art in articulos %}
+    <tr>
+      <th scope="row">{{art.dtl_codigo}}</th>
+      <td>{{art.dtl_descripcion}}</td>
+      <td>{{art.dtl_cantidad}}</td>
+    </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
+{% endblock contenido %}

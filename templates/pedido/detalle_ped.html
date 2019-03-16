@@ -1,0 +1,17 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+    <li><strong>ID Pedido:</strong> {{object.ped_id_ped}}</li>
+    <li><strong>Sucursal:</strong> {{object.ped_id_Suc}}</li>
+    <li><strong>Fecha Creacion:</strong> {{object.ped_fechaCreacion}}</li>
+    <li><strong>Fecha Autorizacion:</strong> {{object.ped_fechaAutorizacion}}</li>
+    <li><strong>Fecha de Cancelacion</strong> {{object.ped_fechaCancelacion}}</li>
+    <li><strong>Estado pedido:</strong> {{object.get_ped_estatusPedido_display}}</li>
+    <li><strong>Usuario Creo:</strong> {{object.ped_id_UsuarioCreo}}</li>
+    <li><strong>Usuario Autorizo:</strong> {{object.ped_id_UsuarioAutorizo}}</li>
+    <li><strong>Usuario Cancelo:</strong> {{object.ped_id_UsuarioCancelo}}</li>
+    <li><strong>Factura:</strong> {{object.ped_pdffac}}</li>
+    <li><strong>Factura:</strong> {{object.ped_xmlfac}}</li>
+    <li><strong>Fecha de subida de la factura:</strong> {{object.ped_fechaSubidaFac}}</li>
+</div>
+{% endblock contenido %}
