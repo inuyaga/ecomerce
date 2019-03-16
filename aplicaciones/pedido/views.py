@@ -4,20 +4,44 @@ from aplicaciones.pedido.models import *
 from aplicaciones.pedido.forms import *
 from django.urls import reverse_lazy
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
+from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from openpyxl.styles import Font, Fill, Alignment
 from django.http import HttpResponse
 from openpyxl import Workbook
-class ProductoLista(ListView):
+class ProductoLista(LoginRequiredMixin, ListView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model=Producto
     template_name='pedido/productos.html'
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
 
-class PrductoCreate(CreateView) :
+class PrductoCreate(LoginRequiredMixin, CreateView) :
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
+    model = Producto
+    form_class = ProductoForm
+    template_name = 'pedido/crear_producto.html'
+    success_url = reverse_lazy('pedido:ProductoLista')
+
+    @method_decorator(permission_required('pedido.add_producto',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+class ProductoUpdate(LoginRequiredMixin, UpdateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model = Producto
     form_class = ProductoForm
     template_name = 'pedido/crear_producto.html'
@@ -27,18 +51,14 @@ class PrductoCreate(CreateView) :
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
-class ProductoUpdate(UpdateView):
-    model = Producto
-    form_class = ProductoForm
-    template_name = 'pedido/crear_producto.html'
-    success_url = reverse_lazy('pedido:ProductoLista')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['usuario']=self.request.user
-        return context
+    @method_decorator(permission_required('pedido.change_producto',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
 
-class ProductoDelete(DeleteView):
+class ProductoDelete(LoginRequiredMixin, DeleteView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model = Producto
     template_name = 'eliminaciones.html'
     success_url = reverse_lazy('pedido:ProductoLista')
@@ -52,7 +72,13 @@ class ProductoDelete(DeleteView):
         context['protected']=protected
         return context
 
-class PedidoList(ListView):
+    @method_decorator(permission_required('pedido.delete_producto',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+
+class PedidoList(LoginRequiredMixin,ListView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model=Pedido
     template_name = 'pedido/pedido_list.html'
 
@@ -76,7 +102,9 @@ class PedidoList(ListView):
 
         return queryset
 
-class CarritoLista(ListView):
+class CarritoLista(LoginRequiredMixin, ListView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model=DetallePedido
     template_name='pedido/carrito.html'
 
@@ -99,7 +127,9 @@ class CarritoLista(ListView):
         DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False).update(dtl_status=True,dtl_id_pedido=pedido)
         return redirect("/")
 
-class CarritoDelete(DeleteView):
+class CarritoDelete(LoginRequiredMixin, DeleteView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model=DetallePedido
     template_name = 'eliminaciones.html'
     success_url=reverse_lazy('pedido:carrito')
@@ -113,7 +143,9 @@ class CarritoDelete(DeleteView):
         context['protected']=protected
         return context
 
-class DowloadExcelPedido(TemplateView):
+class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     def get(self, request , *args, **kwargs):
         from openpyxl.utils import get_column_letter
         wb = Workbook()
@@ -168,7 +200,9 @@ class DowloadExcelPedido(TemplateView):
         wb.save(response)
         return response
 
-class DetallePedidolit(TemplateView):
+class DetallePedidolit(LoginRequiredMixin, TemplateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     template_name = 'pedido/ver_detalle.html'
 
     def get_context_data(self, **kwargs):
@@ -178,7 +212,9 @@ class DetallePedidolit(TemplateView):
         context['articulos']=DetallePedido.objects.filter(dtl_id_pedido=id_pedido)
         return context
 
-class AutorizarPedido(TemplateView):
+class AutorizarPedido(LoginRequiredMixin, TemplateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     template_name = 'pedido/ver_detalle.html'
     def get(self, request , *args, **kwargs):
         import datetime
@@ -188,7 +224,13 @@ class AutorizarPedido(TemplateView):
         rev=reverse_lazy('pedido:listar_pedido')
         return redirect(rev)
 
-class RechazarPedido(TemplateView):
+    @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+
+class RechazarPedido(LoginRequiredMixin,TemplateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     template_name = 'pedido/ver_detalle.html'
     def get(self, request , *args, **kwargs):
         import datetime
@@ -197,8 +239,13 @@ class RechazarPedido(TemplateView):
         Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=4, ped_id_UsuarioCancelo=self.request.user, ped_fechaCancelacion=ahora)
         rev=reverse_lazy('pedido:listar_pedido')
         return redirect(rev)
+    @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
 
-class PedidoUpdate(UpdateView):
+class PedidoUpdate(LoginRequiredMixin, UpdateView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model = Pedido
     form_class = ProductoForm
     template_name ='pedido/pedido_form.html'
@@ -218,7 +265,13 @@ class PedidoUpdate(UpdateView):
         self.object.ped_fechaSubidaFac = ahora
         return super().form_valid(form)
 
-class PedidoDetalleList(DetailView):
+    @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+
+class PedidoDetalleList(LoginRequiredMixin, DetailView):
+    login_url = '/login/'
+    redirect_field_name = 'redirect_to'
     model = Pedido
     template_name = 'pedido/detalle_ped.html'
 

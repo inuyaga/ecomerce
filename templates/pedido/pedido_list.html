@@ -17,7 +17,7 @@
     </tr>
   </thead>
   <tbody>
-  {% for dato in  object_list%}
+    {% for dato in object_list%}
     <tr>
       <th scope="row"><small>{{ dato.ped_id_ped}}</small></th>
       <td><small>{{ dato.ped_fechaCreacion}}</small></td>
@@ -28,39 +28,49 @@
       <td><small>{{ dato.ped_id_UsuarioAutorizo}}</small></td>
       <td><small>{{ dato.get_ped_estatusPedido_display}}</small></td>
       <td>
-      {% if dato.ped_estatusPedido == 3 %}
-      <a href="{{dato.ped_pdffac.url}}">PDF</a>
-      <a href="{{dato.ped_xmlfac.url}}">XML</a>
-      {% endif %}
+        {% if dato.ped_estatusPedido == 3 %}
+        <a href="{{dato.ped_pdffac.url}}">PDF</a>
+        <a href="{{dato.ped_xmlfac.url}}">XML</a>
+        {% endif %}
 
       </td>
 
       <td>
-          <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}" title="Ver productos" role="button">
-              <i class="material-icons">remove_red_eye</i>
-            </a>
-          <a class="btn btn-primary btn-sm" href="{% url 'pedido:pedido_info' dato.ped_id_ped  %}" title="Ver productos" role="button">
-              <i class="material-icons">info</i>
-            </a>
+        <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}" title="Ver productos"
+          role="button">
+          <i class="material-icons">remove_red_eye</i>
+        </a>
+        <a class="btn btn-primary btn-sm" href="{% url 'pedido:pedido_info' dato.ped_id_ped  %}" title="Info" role="button">
+          <i class="material-icons">info</i>
+        </a>
+        {% if usuario.tipo_user != 3 %}
+
 
         {% if dato.ped_estatusPedido == 1 %}
-        <a class="btn btn-success btn-sm" href="{% url 'pedido:auto_pedido' dato.ped_id_ped %}" title="Autorizar" role="button"><i class="material-icons">thumb_up</i></a>
-        <a class="btn btn-danger btn-sm" href="{% url 'pedido:rechaza_pedido' dato.ped_id_ped %}" title="Rechazar" role="button"><i class="material-icons">thumb_down</i></a>
+        <a class="btn btn-success btn-sm" href="{% url 'pedido:auto_pedido' dato.ped_id_ped %}" title="Autorizar" role="button"><i
+            class="material-icons">thumb_up</i></a>
+        <a class="btn btn-danger btn-sm" href="{% url 'pedido:rechaza_pedido' dato.ped_id_ped %}" title="Rechazar" role="button"><i
+            class="material-icons">thumb_down</i></a>
         {% endif %}
 
         {% if dato.ped_estatusPedido == 2 %}
-        <a class="btn btn-secondary btn-sm" target="_blank" title="Excel" href="{% url 'pedido:descarga_pedido' dato.ped_id_ped %}" role="button">
-            <i class="material-icons">cloud_download</i>
-            </a>
-        <a class="btn btn-success btn-sm" title="subir factura" href="{% url 'pedido:pedido_update' dato.ped_id_ped %}" role="button">
-            <i class="material-icons">cloud_upload</i>
-            </a>
+        <a class="btn btn-secondary btn-sm" target="_blank" title="Excel" href="{% url 'pedido:descarga_pedido' dato.ped_id_ped %}"
+          role="button">
+          <i class="material-icons">cloud_download</i>
+        </a>
+        <a class="btn btn-success btn-sm" title="subir factura" href="{% url 'pedido:pedido_update' dato.ped_id_ped %}"
+          role="button">
+          <i class="material-icons">cloud_upload</i>
+        </a>
+        {% endif %}
+
         {% endif %}
 
       </td>
-      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}" role="button">Eliminar</a></td> {% endcomment %}
+      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}"
+          role="button">Eliminar</a></td> {% endcomment %}
     </tr>
-  {% endfor %}
+    {% endfor %}
   </tbody>
 </table>
 
