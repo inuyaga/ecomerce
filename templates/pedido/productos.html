@@ -1,44 +1,72 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
 <div class="container">
-<div class="row">
-    <a href="{% url 'pedido:crear_producto' %}" class="btn btn-outline-dark">Dar de alta a nuevo producto</a>
-</div>
-<div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Codigo</th>
-                <th scope="col">Descripcion</th>
-                <th scope="col">Precio</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for prod in object_list %}
-            <tr>
-                <th scope="row">
-                <a href="{% url 'pedido:changue_producto' prod.id %}">{{prod.prod_codigo}}</a>
+    <div class="row">
+        <a href="{% url 'pedido:crear_producto' %}" class="btn btn-outline-dark">Dar de alta a nuevo producto</a>
+    </div>
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Descripcion</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in object_list %}
+                <tr>
+                    <th scope="row">
+                        <a href="{% url 'pedido:changue_producto' prod.id %}">{{prod.prod_codigo}}</a>
 
-                </th>
-                <td>{{prod.prod_descripcion}}</td>
-                <td>{{prod.prod_precio}}</td>
-                <td>{{prod.get_prod_tipo_display}}</td>
-                <td>
-                {% if prod.prod_estado_producto %}
-                <i class="far fa-thumbs-up"></i>
-                {% else %}
-                <i class="far fa-thumbs-down"></i>
-                {% endif %}
-                </td>
-                <td>
-                    <a class="btn btn-danger" href="{% url 'pedido:delete_producto' prod.id %}" role="button">Eliminar</a>
-                </td>
-            </tr>
-        {% endfor %}
-</tbody>
-</table>
-</div><!--fin fil-->
-</div><!--fin de container-->
+                    </th>
+                    <td>{{prod.prod_descripcion}}</td>
+                    <td>{{prod.prod_precio}}</td>
+                    <td>{{prod.get_prod_tipo_display}}</td>
+                    <td>
+                        {% if prod.prod_estado_producto %}
+                        <i class="far fa-thumbs-up"></i>
+                        {% else %}
+                        <i class="far fa-thumbs-down"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="btn btn-danger" href="{% url 'pedido:delete_producto' prod.id %}" role="button">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row justify-content-md-center">
+            {% if is_paginated %}
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}"><i
+                                class="material-icons">
+                                navigate_before
+                            </i></a></li>
+                    {% endif %}
+                    <span class="page-link">
+                        Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                        <span class="sr-only">(current)</span>
+                    </span>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}"><i
+                                class="material-icons">
+                                navigate_next
+                            </i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+
+    </div>
+    <!--fin fil-->
+</div>
+<!--fin de container-->
 {% endblock contenido %}

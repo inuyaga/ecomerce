@@ -1,5 +1,27 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
+<br>
+<div class="container">
+  <form class="form-inline">
+    <div class="row">
+      <div class="col">
+        <select class="form-control" id="status" name="status">
+          <option selected disabled>Estatus pedido</option>
+          <option value="1">Pendiente por autorizar</option>
+          <option value="2">Autorizado</option>
+          <option value="3">Facturado</option>
+          <option value="4">Rechazado</option>
+          <option value="5">Entregado</option>
+        </select>
+      </div>
+      <div class="col">
+        <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+      </div>
+    </div>
+  </form>
+</div>
+<br>
+
 <table class="table">
   <thead class="thead-dark">
     <tr>

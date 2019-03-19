@@ -18,6 +18,7 @@ class inicio(LoginRequiredMixin, ListView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = Producto
+    paginate_by = 20
     template_name = 'admin/base_ecomer.html'
 
     def get_context_data(self, **kwargs):

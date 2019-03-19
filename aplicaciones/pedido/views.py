@@ -11,10 +11,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from openpyxl.styles import Font, Fill, Alignment
 from django.http import HttpResponse
 from openpyxl import Workbook
+
 class ProductoLista(LoginRequiredMixin, ListView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model=Producto
+    paginate_by = 15
     template_name='pedido/productos.html'
 
 
@@ -88,17 +90,23 @@ class PedidoList(LoginRequiredMixin,ListView):
         return context
     def get_queryset(self):
         queryset = super(PedidoList, self).get_queryset()
+        status = self.request.GET.get('status')
+
         if self.request.user.is_superuser or self.request.user.tipo_user == 2:
-            pass
+            if status != None:
+                queryset=queryset.filter(ped_estatusPedido=status)
 
         elif self.request.user.tipo_user == 1:
             id_zona=self.request.user.zona_pertene
             queryset=queryset.filter(ped_id_Suc__suc_zona=id_zona)
+            if status != None:
+                queryset=queryset.filter(ped_estatusPedido=status)
 
         elif self.request.user.tipo_user == 3:
-            print('hola')
             id_suc=self.request.user.suc_pertene
             queryset=queryset.filter(ped_id_Suc=id_suc)
+            if status != None:
+                queryset=queryset.filter(ped_estatusPedido=status)
 
         return queryset
 
