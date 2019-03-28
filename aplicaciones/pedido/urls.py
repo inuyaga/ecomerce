@@ -20,4 +20,8 @@ urlpatterns = [
     path('pedido_update/<int:pk>/',views.PedidoUpdate.as_view(),name="pedido_update"),
 
     path('informacion_pedido/<int:pk>/',views.PedidoDetalleList.as_view(),name="pedido_info"),
+    path('configuracion/pedido/',views.ConfiguracionList.as_view(),name="configuracion_pedido"),
+    path('configuracion/pedido/create/',views.ConfigCreate.as_view(),name="configuracion_pedido_crea"),
+
+    path('configuracion/pedido/update/<int:pk>/',views.ConfigUpdate.as_view(),name="configuracion_pedido_update"),
 ]

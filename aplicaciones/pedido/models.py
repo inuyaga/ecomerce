@@ -27,6 +27,8 @@ class Pedido(models.Model):
     ped_pdffac=models.FileField("PDF de factura", upload_to="PdfFAC/", max_length=100,blank=True, null=True)
     ped_xmlfac=models.FileField("XML de factura", upload_to="xmlFAC/", max_length=100,blank=True, null=True)
     ped_fechaSubidaFac=models.DateTimeField("Carga de factura", blank=True, null=True)
+    TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"))
+    dtl_tipo_pedido=models.IntegerField(choices=TIPO_PEDIDO, default=0)
     def __str__(self):
         return str(self.ped_id_ped)
 
@@ -39,6 +41,8 @@ class DetallePedido(models.Model):
     dtl_precio=models.FloatField("Precio de producto")
     TIPOPRODUCTO=((1,"Papeleria"),(2,"Limpieza"))
     dtl_tipo=models.IntegerField(choices=TIPOPRODUCTO)
+    TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"))
+    dtl_tipo_pedido=models.IntegerField(choices=TIPO_PEDIDO, default=0)
     dtl_creado_por = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     dtl_status=models.BooleanField('status', default=False)
 
@@ -48,3 +52,10 @@ class DetallePedido(models.Model):
     def total(self):
         suma=self.dtl_cantidad * self.dtl_precio
         return suma
+
+class Configuracion_pedido(models.Model):
+    conf_ID=models.AutoField(primary_key=True)
+    conf_fecha_inicio=models.DateField('Fecha inicio')
+    conf_fecha_fin=models.DateField('Fecha final')
+
+

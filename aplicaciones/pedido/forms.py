@@ -13,7 +13,7 @@ class ProductoForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
-class ProductoForm(forms.ModelForm):
+class PedidoForm(forms.ModelForm):
     class Meta:
         model = Pedido
         fields = ('ped_pdffac', 'ped_xmlfac')
@@ -33,5 +33,26 @@ class DetallePedidoForm(forms.ModelForm):
         fields = ('dtl_cantidad', 'dtl_codigo')
     def __init__(self, *args, **kwargs):
         super(DetallePedidoForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+
+class ConfForm(forms.ModelForm):
+    class Meta:
+        model = Configuracion_pedido
+        fields = ('__all__')
+        widgets = {
+        'conf_fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
+        'conf_fecha_fin' : forms.DateInput(attrs={'type': 'date'}),
+        }
+    def __init__(self, *args, **kwargs):
+        super(ConfForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+class ConfFormEdit(forms.ModelForm):
+    class Meta:
+        model = Configuracion_pedido
+        fields = ('__all__')
+    def __init__(self, *args, **kwargs):
+        super(ConfFormEdit, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})

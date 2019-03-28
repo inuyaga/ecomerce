@@ -35,7 +35,7 @@ class PrductoCreate(LoginRequiredMixin, CreateView) :
 
     @method_decorator(permission_required('pedido.add_producto',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(PrductoCreate, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -56,7 +56,7 @@ class ProductoUpdate(LoginRequiredMixin, UpdateView):
 
     @method_decorator(permission_required('pedido.change_producto',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(ProductoUpdate, self).dispatch(*args, **kwargs)
 
 class ProductoDelete(LoginRequiredMixin, DeleteView):
     login_url = '/login/'
@@ -76,7 +76,7 @@ class ProductoDelete(LoginRequiredMixin, DeleteView):
 
     @method_decorator(permission_required('pedido.delete_producto',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(ProductoDelete, self).dispatch(*args, **kwargs)
 
 class PedidoList(LoginRequiredMixin,ListView):
     login_url = '/login/'
@@ -91,22 +91,29 @@ class PedidoList(LoginRequiredMixin,ListView):
     def get_queryset(self):
         queryset = super(PedidoList, self).get_queryset()
         status = self.request.GET.get('status')
+        tipo_pedido = self.request.GET.get('tipo_pedido')
 
         if self.request.user.is_superuser or self.request.user.tipo_user == 2:
             if status != None:
                 queryset=queryset.filter(ped_estatusPedido=status)
+            if tipo_pedido != None:
+                queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
         elif self.request.user.tipo_user == 1:
             id_zona=self.request.user.zona_pertene
             queryset=queryset.filter(ped_id_Suc__suc_zona=id_zona)
             if status != None:
                 queryset=queryset.filter(ped_estatusPedido=status)
+            if tipo_pedido != None:
+                queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
         elif self.request.user.tipo_user == 3:
             id_suc=self.request.user.suc_pertene
             queryset=queryset.filter(ped_id_Suc=id_suc)
             if status != None:
                 queryset=queryset.filter(ped_estatusPedido=status)
+            if tipo_pedido != None:
+                queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
         return queryset
 
@@ -127,12 +134,36 @@ class CarritoLista(LoginRequiredMixin, ListView):
         return queryset
 
     def post(self, request, *args, **kwargs):
-        pedido=Pedido(
+
+
+        tipo_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1)
+        tipo_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
+        tipo_limpieza_consultorio=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
+
+        if tipo_papeleria != None:
+            pedido=Pedido(
             ped_id_Suc=self.request.user.suc_pertene,
             ped_id_UsuarioCreo=self.request.user,
-        )
-        pedido.save()
-        DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False).update(dtl_status=True,dtl_id_pedido=pedido)
+            dtl_tipo_pedido=1,
+            )
+            pedido.save()
+            DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1).update(dtl_status=True,dtl_id_pedido=pedido)
+        if tipo_limpieza != None:
+            pedido=Pedido(
+            ped_id_Suc=self.request.user.suc_pertene,
+            ped_id_UsuarioCreo=self.request.user,
+            dtl_tipo_pedido=2,
+            )
+            pedido.save()
+            DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2).update(dtl_status=True,dtl_id_pedido=pedido)
+        if tipo_limpieza_consultorio != None:
+            pedido=Pedido(
+            ped_id_Suc=self.request.user.suc_pertene,
+            ped_id_UsuarioCreo=self.request.user,
+            dtl_tipo_pedido=3,
+            )
+            pedido.save()
+            DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3).update(dtl_status=True,dtl_id_pedido=pedido)
         return redirect("/")
 
 class CarritoDelete(LoginRequiredMixin, DeleteView):
@@ -201,7 +232,7 @@ class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
             ws.column_dimensions[get_column_letter(col)].width = value
 
 
-        nombre_archivo='detalle_pedido_'+str(id_pedido)+'.xls'
+        nombre_archivo='pedido_no_'+str(id_pedido)+'.xls'
         response = HttpResponse(content_type="application/ms-excel")
         content = "attachment; filename = {0}".format(nombre_archivo)
         response['Content-Disposition']=content
@@ -234,7 +265,7 @@ class AutorizarPedido(LoginRequiredMixin, TemplateView):
 
     @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(AutorizarPedido, self).dispatch(*args, **kwargs)
 
 class RechazarPedido(LoginRequiredMixin,TemplateView):
     login_url = '/login/'
@@ -249,13 +280,13 @@ class RechazarPedido(LoginRequiredMixin,TemplateView):
         return redirect(rev)
     @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(RechazarPedido, self).dispatch(*args, **kwargs)
 
 class PedidoUpdate(LoginRequiredMixin, UpdateView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = Pedido
-    form_class = ProductoForm
+    form_class = PedidoForm
     template_name ='pedido/pedido_form.html'
     success_url = reverse_lazy('pedido:listar_pedido')
 
@@ -275,7 +306,7 @@ class PedidoUpdate(LoginRequiredMixin, UpdateView):
 
     @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
-                return super(ZonaCreate, self).dispatch(*args, **kwargs)
+                return super(PedidoUpdate, self).dispatch(*args, **kwargs)
 
 class PedidoDetalleList(LoginRequiredMixin, DetailView):
     login_url = '/login/'
@@ -287,3 +318,30 @@ class PedidoDetalleList(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+class ConfiguracionList(ListView):
+    model=Configuracion_pedido
+    template_name='pedido/conf_pedido.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+
+class ConfigCreate(CreateView):
+    model=Configuracion_pedido
+    form_class=ConfForm
+    template_name='pedido/conf_create.html'
+    success_url=reverse_lazy('pedido:configuracion_pedido')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+class ConfigUpdate(UpdateView):
+    model=Configuracion_pedido
+    form_class=ConfFormEdit
+    template_name='pedido/conf_create.html'
+    success_url=reverse_lazy('pedido:configuracion_pedido')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+

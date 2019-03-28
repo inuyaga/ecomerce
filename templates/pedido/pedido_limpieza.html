@@ -1,0 +1,131 @@
+ {% extends 'admin/base_ecomer.html'%}
+ {% block contenido %}
+
+ <style type='text/css'>
+     p {
+         font: 12px sans-serif;
+         border: 1px solid gold;
+         background: lightyellow;
+         padding: 5px;
+         width: 250px;
+         height: 80px;
+         float: left;
+         margin: 5px;
+     }
+
+     p#scroll {
+         overflow: scroll;
+     }
+ </style>
+ <div class="row">
+     {% if comparacion %}
+
+     {% for producto in object_list %}
+     <div class="col-3">
+         <div class="card" style="width: 18rem;">
+             <img src="{{ producto.prod_rutaimg.url }}" class="card-img-top imagen" width="50" height="250" alt="...">
+             <div class="card-body">
+                 <h5 class="card-title">{{producto.prod_codigo}}</h5>
+                 <p id='scroll' class="card-text">{{producto.prod_descripcion}}</p>
+
+                 <div class="form-group col-md-12 row justify-content-md-center">
+                     <label for="inputEmail4">Cantidad</label>
+                     <input type="number" id="{{producto.prod_codigo}}" class="form-control" min="1" value="1">
+                 </div>
+                 <div class="row justify-content-md-center">
+                     <button type="button" onclick="agregar('{{producto.prod_codigo}}')"
+                         class="btn btn-primary">Agregar</button>
+                 </div>
+
+
+             </div>
+         </div>
+     </div>
+
+     {% endfor %}
+ </div>
+
+
+
+ <div class="row justify-content-md-center">
+     {% if is_paginated %}
+     <nav aria-label="Page navigation example">
+         <ul class="pagination">
+             {% if page_obj.has_previous %}
+             <li class="page-item"><a class="page-link"
+                     href="{{ request.path }}?page={{ page_obj.previous_page_number }}{% if filtro != None %}&filtro={{filtro}}{% endif %}"><i
+                         class="material-icons">
+                         navigate_before
+                     </i></a></li>
+             {% endif %}
+
+             {% for i in paginator.page_range %}
+             {% if page_obj.number == i %}
+             <li class="page-item active"><a class="page-link" href="#">{{ i }}<span
+                         class="sr-only">(current)</span></a></li>
+             {% else %}
+             <li class="page-item"><a class="page-link"
+                     href="?page={{ i }}{% if filtro != None %}&filtro={{filtro}}{% endif %}">{{ i }}</a>
+             </li>
+             {% endif %}
+             {% endfor %}
+
+             {% if page_obj.has_next %}
+             <li class="page-item"><a class="page-link"
+                     href="{{ request.path }}?page={{ page_obj.next_page_number }}{% if filtro != None %}&filtro={{filtro}}{% endif %}"><i
+                         class="material-icons">
+                         navigate_next
+                     </i></a></li>
+             {% endif %}
+         </ul>
+     </nav>
+     {% endif %}
+ </div>
+
+
+ {% else %}
+ <div class="container">
+     <div class="row justify-content-md-center">
+            <h3>Es necesario configurar dias de pedido, contacte con el administrador del sistema para poder crear nuevos pedidos</h3>
+         {% for fech_ped in conf_fecha %}
+         <h3>Dias de pedido Inicio: {{fech_ped.conf_fecha_inicio}} Fin: {{fech_ped.conf_fecha_fin}}</h3>
+         {% endfor %}
+     </div>
+ </div>
+ {% endif %}
+
+ {% endblock contenido %}
+
+ {% block script %}
+ <script>
+     function agregar(codigo) {
+         $.ajax({
+             type: "POST",
+             url: "{% url 'empresa:detl_pedido_crear' %}",
+             data: {
+                 csrfmiddlewaretoken: '{{ csrf_token }}',
+                 dtl_codigo: codigo,
+                 dtl_cantidad: $('#' + codigo).val(),
+                 dtl_tipo_pedido: '{{ view.kwargs.tipo }}'
+             },
+             success: function (data) {
+                 var message = data.content.mensaje
+                 // var contado = data.content.conteo
+                 var tipo_mensaje = data.content.tipo_mensaje
+                 if (tipo_mensaje) {
+                     alertify.success(message);
+                 } else {
+                     alertify.error(message);
+                 }
+                 // $('#conteo').replaceWith('<span class="badge badge-light" id="conteo">' + contado +
+                 //     '</span>');
+
+             },
+             error: function (data) {
+                 console.log('An error occurred.');
+                 console.log(data);
+             },
+         });
+     }
+ </script>
+ {% endblock script %}

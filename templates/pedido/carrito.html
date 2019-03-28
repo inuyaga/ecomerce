@@ -6,6 +6,7 @@
       <th scope="col">Códido</th>
       <th scope="col">Descripción</th>
       <th scope="col">Cantidad</th>
+      <th scope="col">Tipo</th>
       <th scope="col">Acción</th>
     </tr>
   </thead>
@@ -15,6 +16,7 @@
       <th scope="row">{{ dato.dtl_codigo}}</th>
       <td>{{ dato.dtl_descripcion}}</td>
       <td>{{ dato.dtl_cantidad}}</td>
+      <td>{{ dato.get_dtl_tipo_pedido_display}}</td>
       <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}" role="button">Eliminar</a></td>
     </tr>
   {% endfor %}

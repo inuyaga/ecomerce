@@ -27,7 +27,8 @@
 
     <!-- Vendor CSS-->
     <link href="{% static 'vendor/animsition/animsition.min.css' %}" rel="stylesheet" media="all">
-    <link href="{% static 'vendor/bootstrap-progressbar/bootstrap-progressbar-3.3.4.min.css' %}" rel="stylesheet" media="all">
+    <link href="{% static 'vendor/bootstrap-progressbar/bootstrap-progressbar-3.3.4.min.css' %}" rel="stylesheet"
+        media="all">
     <!-- <link href="{% static 'vendor/wow/animate.css' %}" rel="stylesheet %}" media="all"> -->
     <link href="{% static 'vendor/css-hamburgers/hamburgers.min.css' %}" rel="stylesheet" media="all">
     <link href="{% static 'vendor/slick/slick.css' %}" rel="stylesheet" media="all">
@@ -36,12 +37,15 @@
 
     <!-- Main CSS-->
     <link href="{% static 'css/theme.css' %}" rel="stylesheet" media="all">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css"/>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
+    <link href="{% static 'css/ihover.css' %}" rel="stylesheet" media="all">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css" />
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 </head>
+
+
 
 <body class="animsition">
     <div class="page-wrapper">
@@ -52,7 +56,8 @@
                 <div class="header3-wrap">
                     <div class="header__logo">
                         <a href="{% url 'index' %}">
-                            <img src="{% static 'images/icon/logo-white.png' %}" alt="CoolAdmin" />
+                            <img src="{% static 'images/logo-farmatodo.png' %}" style="width:200px;height:60px;"
+                                alt="ecommerce" />
                         </a>
                     </div>
                     <div class="header__navbar">
@@ -74,6 +79,12 @@
                                     </li>
                                     <li>
                                         <a href="{% url 'pedido:carrito' %}">Ver carrito de compras</a>
+                                    </li>
+                                    {% endif %}
+
+                                    {% if perms.pedido.view_configuracion_pedido %}
+                                    <li>
+                                        <a href="{% url 'pedido:configuracion_pedido' %}">Configurar</a>
                                     </li>
                                     {% endif %}
                                 </ul>
@@ -170,6 +181,10 @@
                                                 <i class="zmdi zmdi-account"></i>Usuarios</a>
                                         </div>
                                         {% endif %}
+                                        <div class="account-dropdown__item">
+                                                <a href="{% url 'usuarios:user_update_password' %}">
+                                                    <i class="zmdi zmdi-account"></i>Cambiar contraseña</a>
+                                        </div>
 
                                     </div>
                                     <div class="account-dropdown__footer">
@@ -196,64 +211,51 @@
                     poder hacer pedidos</h4>
             </div>
             {% else %}
-            <div class="row">
-                {% for producto in object_list %}
 
-                <div class="col-3">
-                    <div class="card" style="width: 18rem;">
-                        <img src="{{ producto.prod_rutaimg.url }}" class="card-img-top" width="50" height="250" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">{{producto.prod_codigo}}</h5>
-                            <p class="card-text">{{producto.prod_descripcion}}</p>
-
-                            <div class="form-group col-md-12 row justify-content-md-center">
-                                <label for="inputEmail4">Cantidad</label>
-                                <input type="number" id="{{producto.prod_codigo}}" class="form-control" min="1"
-                                    value="1">
-                            </div>
-                            <div class="row justify-content-md-center">
-                                <button type="button" onclick="agregar('{{producto.prod_codigo}}')" class="btn btn-primary">Agregar</button>
-                            </div>
-
-
+                <div class="container">
+                    <br>
+                    <div class="row justify-content-md-center">
+                        <h3>Crear nuevo pedido</h3>
+                    </div>
+                    <br>
+                    <div class="row justify-content-md-center">
+                        <div class="col-sm-4">
+                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 3 %}">
+                                    <div class="img"><img src="{% static 'images/limpieza-hogar.jpg' %}" alt="img">
+                                    </div>
+                                    <div class="info">
+                                        <h3>Limpeza</h3>
+                                        <p>Consultorio</p>
+                                    </div>
+                                </a></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 2 %}">
+                                    <div class="img"><img src="{% static 'images/limpieza.jpg' %}" alt="img">
+                                    </div>
+                                    <div class="info">
+                                        <h3>Limpieza</h3>
+                                        <p>Sucursal</p>
+                                    </div>
+                                </a></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 1 %}">
+                                    <div class="img"><img src="{% static 'images/papeleria.jpg' %}" alt="img">
+                                    </div>
+                                    <div class="info">
+                                        <h3>Papeleria</h3>
+                                        <p>Sucursal</p>
+                                    </div>
+                                </a></div>
                         </div>
                     </div>
                 </div>
 
-                {% endfor %}
-            </div>
             {% endif %}
 
-
-            <div class="row justify-content-md-center">
-                {% if is_paginated %}
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.previous_page_number }}"><i
-                                    class="material-icons">
-                                    navigate_before
-                                </i></a></li>
-                        {% endif %}
-                        <span class="page-link">
-                            Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
-                            <span class="sr-only">(current)</span>
-                        </span>
-                        {% if page_obj.has_next %}
-                        <li class="page-item"><a class="page-link" href="{{ request.path }}?page={{ page_obj.next_page_number }}"><i
-                                    class="material-icons">
-                                    navigate_next
-                                </i></a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-            </div>
-
-
-
             {% endblock contenido %}
-        </div>
+
 
 
     </div>
@@ -286,37 +288,9 @@
     <!-- Main JS-->
     <script src="{% static 'js/main.js' %}"></script>
 
-    <script>
+    {% block script %}
 
-        function agregar(codigo) {
-            $.ajax({
-                type: "POST",
-                url: "{% url 'empresa:detl_pedido_crear' %}",
-                data: {
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    dtl_codigo: codigo,
-                    dtl_cantidad: $('#' + codigo).val()
-                },
-                success: function (data) {
-                    var message = data.content.mensaje
-                    // var contado = data.content.conteo
-                    var tipo_mensaje = data.content.tipo_mensaje
-                    if (tipo_mensaje) {
-                        alertify.success(message);
-                    } else {
-                        alertify.error(message);
-                    }
-                    // $('#conteo').replaceWith('<span class="badge badge-light" id="conteo">' + contado +
-                    //     '</span>');
-
-                },
-                error: function (data) {
-                    console.log('An error occurred.');
-                    console.log(data);
-                },
-            });
-        }
-    </script>
+    {% endblock script %}
 
 </body>
 

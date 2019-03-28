@@ -15,6 +15,14 @@
         </select>
       </div>
       <div class="col">
+        <select class="form-control" id="tipo_pedido" name="tipo_pedido">
+          <option selected disabled>Tipo de pedido</option>
+          <option value="1">Papeleria</option>
+          <option value="2">Limpieza</option>
+          <option value="3">Limpieza consultorio</option>
+        </select>
+      </div>
+      <div class="col">
         <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
       </div>
     </div>
@@ -31,6 +39,7 @@
       <th scope="col"><small>Sucursal</small></th>
       <th scope="col"><small>Zona</small></th>
       <th scope="col"><small>Usuario</small></th>
+      <th scope="col"><small>Tipo</small></th>
       <th scope="col"><small>Autorizó</small></th>
       <th scope="col"><small>Estatus</small></th>
       <th scope="col"><small>Factura</small></th>
@@ -47,6 +56,7 @@
       <td><small>{{ dato.ped_id_Suc}}</small></td>
       <td><small>{{ dato.ped_id_Suc.suc_zona}}</small></td>
       <td><small>{{ dato.ped_id_UsuarioCreo}}</small></td>
+      <td><small>{{ dato.get_dtl_tipo_pedido_display}}</small></td>
       <td><small>{{ dato.ped_id_UsuarioAutorizo}}</small></td>
       <td><small>{{ dato.get_ped_estatusPedido_display}}</small></td>
       <td>
@@ -76,6 +86,7 @@
         {% endif %}
 
         {% if dato.ped_estatusPedido == 2 %}
+        {% if perms.pedido.delete_pedido %}
         <a class="btn btn-secondary btn-sm" target="_blank" title="Excel" href="{% url 'pedido:descarga_pedido' dato.ped_id_ped %}"
           role="button">
           <i class="material-icons">cloud_download</i>
@@ -84,6 +95,7 @@
           role="button">
           <i class="material-icons">cloud_upload</i>
         </a>
+        {% endif %}
         {% endif %}
 
         {% endif %}
