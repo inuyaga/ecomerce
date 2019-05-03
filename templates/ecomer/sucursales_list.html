@@ -1,6 +1,13 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
 <div class="container">
+  <br>
+<form class="form-inline" method="GET">
+  <input type="text" class="form-control mb-2 mr-sm-2" id="buscar" name="buscar" placeholder="Nombre Sucursal o Zona">
+
+  <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+</form>
+<a class="btn btn-primary mb-2" href="{% url 'empresa:list_sucursales' %}" role="button">Todo</a>
   <table class="table">
     <thead class="thead-light">
       <tr>

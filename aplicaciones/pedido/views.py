@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.views.generic import CreateView,ListView,UpdateView,DeleteView, TemplateView, DetailView
 from aplicaciones.pedido.models import *
 from aplicaciones.pedido.forms import *
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
@@ -11,19 +11,28 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from openpyxl.styles import Font, Fill, Alignment
 from django.http import HttpResponse
 from openpyxl import Workbook
+from django.db.models import Q
 
 class ProductoLista(LoginRequiredMixin, ListView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model=Producto
-    paginate_by = 15
+    paginate_by = 250
     template_name='pedido/productos.html'
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    def get_queryset(self):
+        queryset = super(ProductoLista, self).get_queryset()
+        buesqueda=self.request.GET.get('search')
+        if buesqueda != None:
+            queryset=queryset.filter(Q(prod_codigo=buesqueda) | Q(prod_descripcion__icontains=buesqueda))
+
+
+        return queryset
 
 class PrductoCreate(LoginRequiredMixin, CreateView) :
     login_url = '/login/'
@@ -94,24 +103,35 @@ class PedidoList(LoginRequiredMixin,ListView):
         tipo_pedido = self.request.GET.get('tipo_pedido')
 
         if self.request.user.is_superuser or self.request.user.tipo_user == 2:
+            queryset=queryset.filter(ped_estatusPedido=1)
             if status != None:
-                queryset=queryset.filter(ped_estatusPedido=status)
+                queryset=Pedido.objects.filter(ped_estatusPedido=status)
+                if status == '0':
+                    queryset=Pedido.objects.all()
             if tipo_pedido != None:
                 queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
         elif self.request.user.tipo_user == 1:
             id_zona=self.request.user.zona_pertene
-            queryset=queryset.filter(ped_id_Suc__suc_zona=id_zona)
+            queryset=queryset.filter(ped_id_Suc__suc_zona=id_zona, ped_estatusPedido=1)
+
+            queryset_init=queryset.filter(ped_id_Suc__suc_zona=id_zona)
             if status != None:
-                queryset=queryset.filter(ped_estatusPedido=status)
+                queryset=queryset_init.filter(ped_estatusPedido=status)
+                if status == '0':
+                    queryset=queryset_init
             if tipo_pedido != None:
                 queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
         elif self.request.user.tipo_user == 3:
             id_suc=self.request.user.suc_pertene
-            queryset=queryset.filter(ped_id_Suc=id_suc)
+            queryset=queryset.filter(ped_id_Suc=id_suc, ped_estatusPedido=1)
+
+            queryset_init=queryset.filter(ped_id_Suc=id_suc)
             if status != None:
-                queryset=queryset.filter(ped_estatusPedido=status)
+                queryset=queryset_init.filter(ped_estatusPedido=status)
+                if status == '0':
+                    queryset=queryset_init
             if tipo_pedido != None:
                 queryset=queryset.filter(dtl_tipo_pedido=tipo_pedido)
 
@@ -126,6 +146,10 @@ class CarritoLista(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
+        context['ped_papeleria']=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1)
+        context['ped_lim_consultorio']=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
+        context['ped_lim_sucursal']=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
+
         return context
 
     def get_queryset(self):
@@ -135,12 +159,9 @@ class CarritoLista(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
 
+        tipo_pedido=request.POST.get('tipo_pedido')
 
-        tipo_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1)
-        tipo_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
-        tipo_limpieza_consultorio=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
-
-        if tipo_papeleria != None:
+        if tipo_pedido == 'papeleria':
             pedido=Pedido(
             ped_id_Suc=self.request.user.suc_pertene,
             ped_id_UsuarioCreo=self.request.user,
@@ -148,7 +169,7 @@ class CarritoLista(LoginRequiredMixin, ListView):
             )
             pedido.save()
             DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1).update(dtl_status=True,dtl_id_pedido=pedido)
-        if tipo_limpieza != None:
+        if tipo_pedido == 'sucursal':
             pedido=Pedido(
             ped_id_Suc=self.request.user.suc_pertene,
             ped_id_UsuarioCreo=self.request.user,
@@ -156,7 +177,7 @@ class CarritoLista(LoginRequiredMixin, ListView):
             )
             pedido.save()
             DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2).update(dtl_status=True,dtl_id_pedido=pedido)
-        if tipo_limpieza_consultorio != None:
+        if tipo_pedido == 'consultorio':
             pedido=Pedido(
             ped_id_Suc=self.request.user.suc_pertene,
             ped_id_UsuarioCreo=self.request.user,
@@ -164,7 +185,9 @@ class CarritoLista(LoginRequiredMixin, ListView):
             )
             pedido.save()
             DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3).update(dtl_status=True,dtl_id_pedido=pedido)
-        return redirect("/")
+
+        url=reverse_lazy('pedido:carrito')
+        return redirect(url)
 
 class CarritoDelete(LoginRequiredMixin, DeleteView):
     login_url = '/login/'
@@ -187,6 +210,7 @@ class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
     redirect_field_name = 'redirect_to'
     def get(self, request , *args, **kwargs):
         from openpyxl.utils import get_column_letter
+        import datetime
         wb = Workbook()
         ws=wb.active
         id_pedido=self.kwargs.get('pk')
@@ -232,6 +256,9 @@ class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
             ws.column_dimensions[get_column_letter(col)].width = value
 
 
+
+        ahora = datetime.datetime.now()
+        Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=6, ped_id_usr_descargo_excel=self.request.user)
         nombre_archivo='pedido_no_'+str(id_pedido)+'.xls'
         response = HttpResponse(content_type="application/ms-excel")
         content = "attachment; filename = {0}".format(nombre_archivo)
@@ -245,21 +272,69 @@ class DetallePedidolit(LoginRequiredMixin, TemplateView):
     template_name = 'pedido/ver_detalle.html'
 
     def get_context_data(self, **kwargs):
+        from django.db.models import Sum
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         id_pedido=self.kwargs.get('pk')
         context['articulos']=DetallePedido.objects.filter(dtl_id_pedido=id_pedido)
+        context['suma_total']=DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(Sum('dtl_precio'))
+        context['suma_total_partids']=DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(Sum('dtl_cantidad'))
         return context
+
+class DetallePeditoEliminar(DeleteView):
+    model=DetallePedido
+    template_name = 'eliminaciones.html'
+    success_url=reverse_lazy('pedido:detalle_pedido')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+    def get_success_url(self):
+        slug = self.kwargs['pedo_id']
+        link=reverse_lazy('pedido:detalle_pedido', kwargs={'pk': slug})
+        return link
+
+    @method_decorator(permission_required('pedido.delete_detallepedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+        return super(DetallePeditoEliminar, self).dispatch(*args, **kwargs)
+
+class DetallePedidoEdit(UpdateView):
+    model=DetallePedido
+    template_name='pedido/conf_create.html'
+    form_class=DetallePedidoFormEdit
+    success_url='/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        return context
+
+    def get_success_url(self):
+        slug = self.kwargs['pedo_id']
+        link=reverse_lazy('pedido:detalle_pedido', kwargs={'pk': slug})
+        return link
+
+    @method_decorator(permission_required('pedido.change_detallepedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+        return super(DetallePedidoEdit, self).dispatch(*args, **kwargs)
+ 
+
 
 class AutorizarPedido(LoginRequiredMixin, TemplateView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     template_name = 'pedido/ver_detalle.html'
     def get(self, request , *args, **kwargs):
-        import datetime
-        ahora = datetime.datetime.now()
+        from datetime import datetime
+        ahora = datetime.now()
         id_pedido=self.kwargs.get('pk')
-        Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=2, ped_id_UsuarioAutorizo=self.request.user, ped_fechaAutorizacion=ahora)
+        confs=Configuracion_pedido.objects.all()
+        for config in confs:
+            if ahora.date() <= config.conf_fecha_fin_autorizador:
+                Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=2, ped_id_UsuarioAutorizo=self.request.user, ped_fechaAutorizacion=ahora)
+            else:
+                Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=2, ped_id_UsuarioAutorizo=self.request.user, ped_fechaAutorizacion=ahora, ped_autorizo_fuera_tiempo=True)
+
         rev=reverse_lazy('pedido:listar_pedido')
         return redirect(rev)
 
@@ -276,6 +351,7 @@ class RechazarPedido(LoginRequiredMixin,TemplateView):
         ahora = datetime.datetime.now()
         id_pedido=self.kwargs.get('pk')
         Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=4, ped_id_UsuarioCancelo=self.request.user, ped_fechaCancelacion=ahora)
+
         rev=reverse_lazy('pedido:listar_pedido')
         return redirect(rev)
     @method_decorator(permission_required('pedido.change_pedido',reverse_lazy('requiere_permisos')))
@@ -344,4 +420,21 @@ class ConfigUpdate(UpdateView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+class PedidoDeleteRechazado(TemplateView):
+    template_name='eliminaciones.html'
+    def post(self, request, *args, **kwargs):
+        Pedido.objects.filter(ped_estatusPedido=4).delete()
+        url=reverse_lazy('pedido:listar_pedido')
+        return redirect(url)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        del_objs=Pedido.objects.filter(ped_estatusPedido=4)
+
+        return context
+    @method_decorator(permission_required('pedido.delete_pedido',reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+                return super(PedidoDeleteRechazado, self).dispatch(*args, **kwargs)
 

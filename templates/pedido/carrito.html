@@ -22,12 +22,31 @@
   {% endfor %}
   </tbody>
 </table>
-{% if object_list  %}
+<div class="row">
+
+
+{% if ped_papeleria  %}
 <form action="" method="post">
     {% csrf_token %}
-    <button type="submit" class="btn btn-success">Confirmar pedido!</button>
+    <input type="hidden" value="papeleria" name="tipo_pedido">
+    <button type="submit" class="btn btn-primary">Confirmar pedido Papeleria!</button>
 </form>
 {% endif %}
+{% if ped_lim_consultorio  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="consultorio" name="tipo_pedido">
+    <button type="submit" class="btn btn-success">Confirmar pedido Consultorio!</button>
+</form>
+{% endif %}
+{% if ped_lim_sucursal  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="sucursal" name="tipo_pedido">
+    <button type="submit" class="btn btn-info">Confirmar pedido Sucursal!</button>
+</form>
+{% endif %}
+</div>
 {% endblock contenido %}
 
 

@@ -8,6 +8,7 @@
         <tr>
           <th scope="col">Fecha inicio</th>
           <th scope="col">Fecha final</th>
+          <th scope="col">Fecha final para autorizador</th>
           <th scope="col">Accion</th>
         </tr>
       </thead>
@@ -16,6 +17,7 @@
         <tr>
           <td>{{conf.conf_fecha_inicio}}</td>
           <td>{{conf.conf_fecha_fin}}</td>
+          <td>{{conf.conf_fecha_fin_autorizador}}</td>
           <td>
                 <a class="btn btn-outline-primary" href="{% url 'pedido:configuracion_pedido_update' conf.conf_ID %}" role="button"><i class="material-icons">border_color</i></a>
           </td>

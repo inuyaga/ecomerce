@@ -7,11 +7,14 @@
       <div class="col">
         <select class="form-control" id="status" name="status">
           <option selected disabled>Estatus pedido</option>
+          <option value="0">Todo</option>
           <option value="1">Pendiente por autorizar</option>
           <option value="2">Autorizado</option>
+          <option value="6">Excel Descargado</option>
           <option value="3">Facturado</option>
           <option value="4">Rechazado</option>
           <option value="5">Entregado</option>
+
         </select>
       </div>
       <div class="col">
@@ -24,6 +27,11 @@
       </div>
       <div class="col">
         <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+      </div>
+      <div class="col">
+      {% if perms.pedido.delete_pedido  %}
+        <a class="btn btn-danger mb-2" href="{% url 'pedido:listar_pedido_delete' %}" role="button">Eliminar pedidos rechazados</a>
+      {% endif %}
       </div>
     </div>
   </form>
@@ -58,7 +66,13 @@
       <td><small>{{ dato.ped_id_UsuarioCreo}}</small></td>
       <td><small>{{ dato.get_dtl_tipo_pedido_display}}</small></td>
       <td><small>{{ dato.ped_id_UsuarioAutorizo}}</small></td>
-      <td><small>{{ dato.get_ped_estatusPedido_display}}</small></td>
+      <td><small>
+      {% if dato.ped_autorizo_fuera_tiempo %}
+      <span class="badge badge-danger">{{ dato.get_ped_estatusPedido_display}}</span>
+      {% else %}
+      <span class="badge badge-success">{{ dato.get_ped_estatusPedido_display}}</span>
+      {% endif %}
+      </small></td>
       <td>
         {% if dato.ped_estatusPedido == 3 %}
         <a href="{{dato.ped_pdffac.url}}">PDF</a>
@@ -86,7 +100,7 @@
         {% endif %}
 
         {% if dato.ped_estatusPedido == 2 %}
-        {% if perms.pedido.delete_pedido %}
+
         <a class="btn btn-secondary btn-sm" target="_blank" title="Excel" href="{% url 'pedido:descarga_pedido' dato.ped_id_ped %}"
           role="button">
           <i class="material-icons">cloud_download</i>
@@ -95,7 +109,7 @@
           role="button">
           <i class="material-icons">cloud_upload</i>
         </a>
-        {% endif %}
+
         {% endif %}
 
         {% endif %}

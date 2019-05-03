@@ -18,7 +18,13 @@
      }
  </style>
  <div class="row">
+
+    
      {% if comparacion %}
+
+     {% if object_list %}
+
+
 
      {% for producto in object_list %}
      <div class="col-3">
@@ -26,6 +32,7 @@
              <img src="{{ producto.prod_rutaimg.url }}" class="card-img-top imagen" width="50" height="250" alt="...">
              <div class="card-body">
                  <h5 class="card-title">{{producto.prod_codigo}}</h5>
+                 <h5>${{producto.prod_precio}}</h5>
                  <p id='scroll' class="card-text">{{producto.prod_descripcion}}</p>
 
                  <div class="form-group col-md-12 row justify-content-md-center">
@@ -43,6 +50,11 @@
      </div>
 
      {% endfor %}
+     {% else %} 
+     <div class="container">
+         <h3 class="text-success">Actualmente existe un pedido realizado al mes correspondiente de {% now "F Y" %}</h3>
+     </div>
+     {% endif %}
  </div>
 
 

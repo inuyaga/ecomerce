@@ -1,5 +1,12 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
+  <br>
+<form class="form-inline" method="GET">
+  <input type="text" class="form-control mb-2 mr-sm-2" id="buscar" name="buscar" placeholder="Usuario o nombre">
+  <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+  <a class="btn btn-success" href="{% url 'usuarios:list_user' %}" role="button">Todo</a>
+</form>
+
   <a class="btn btn btn-secondary btn-sm" href="{% url 'usuarios:crear_user' %}" role="button">Añadir</a>
   <table class="table">
     <thead class="thead-light">
@@ -18,7 +25,14 @@
     <tbody>
       {% for usr in object_list %}
       <tr>
-        <th scope="row"><a href="{% url 'usuarios:user_update' usr.id %}"><small>{{usr.username}}</small></a></th>
+        <th scope="row">
+          {% if usuario.is_superuser %}
+          <a href="{% url 'usuarios:user_update' usr.id %}"><small>{{usr.username}}</small></a>
+          {% else %}
+          <a href="{% url 'usuarios:user_update_normal' usr.id %}"><small>{{usr.username}}</small></a>
+          {% endif %}
+
+        </th>
         <th scope="row"><small>{{usr.first_name}}</small></th>
         <th scope="row"><small>{{usr.last_name}}</small></th>
         <th scope="row"><small>{{usr.email}}</small></th>
@@ -39,7 +53,11 @@
         <th scope="row"><small>{{usr.get_tipo_user_display}}</small></th>
         <th scope="row"><small>{{usr.suc_pertene}}</small></th>
         <th scope="row"><small>{{usr.zona_pertene}}</small></th>
-        <th scope="row"><small><a class="btn btn-primary btn-sm" title="Cambiar password" href="{% url 'usuarios:user_update_pass' usr.id %}" role="button"><i class="material-icons"> vpn_key </i></a></small></th>
+        <th scope="row">
+          {% if perms.usuario.change_user %}
+          <small><a class="btn btn-primary btn-sm" title="Cambiar password" href="{% url 'usuarios:user_update_pass' usr.id %}" role="button"><i class="material-icons"> vpn_key </i></a></small>
+          {% endif %}
+        </th>
       </tr>
       {% endfor %}
 

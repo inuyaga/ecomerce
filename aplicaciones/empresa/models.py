@@ -13,7 +13,7 @@ class Sucursal(models.Model):
     suc_zona=models.ForeignKey(Zona, verbose_name='Pertenece zona', on_delete=models.CASCADE)
     suc_monto_papeleria=models.FloatField('Monto a comprar papeleria')
     suc_monto_limpieza=models.FloatField('Monto a comprar limpieza')
-    suc_monto_limpieza_oficina=models.FloatField('Monto a comprar limpieza oficina', default=0)
+    suc_monto_limpieza_oficina=models.FloatField('Monto a comprar limpieza consultorio', default=0)
 
     def __str__(self):
             return self.suc_nombre

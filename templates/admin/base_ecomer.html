@@ -175,7 +175,7 @@
                                         </div>
                                     </div>
                                     <div class="account-dropdown__body">
-                                        {% if usuario.is_superuser %}
+                                        {% if perms.usuario.view_user %}
                                         <div class="account-dropdown__item">
                                             <a href="{% url 'usuarios:list_user' %}">
                                                 <i class="zmdi zmdi-account"></i>Usuarios</a>
@@ -205,11 +205,14 @@
             {% block contenido %}
 
             {% if usuario.suc_pertene is None %}
+
+            {% if usuario.tipo_user is 3 %}
             <div class="container">
                 <br>
                 <h4 class="text-danger">Usuario sin una sucursal asignada, contacte al administrador del sistema para
                     poder hacer pedidos</h4>
             </div>
+            {% endif %}
             {% else %}
 
                 <div class="container">

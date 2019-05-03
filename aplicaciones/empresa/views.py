@@ -7,10 +7,10 @@ from django.urls import reverse_lazy
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
-from aplicaciones.pedido.models import Producto, DetallePedido, Configuracion_pedido
+from aplicaciones.pedido.models import Producto, DetallePedido, Configuracion_pedido, Pedido
 from aplicaciones.pedido.forms import DetallePedidoForm
 from django.http import JsonResponse
-from django.db.models import Sum, F, FloatField
+from django.db.models import Sum, F, Q, FloatField
 # Create your views here.
 
 
@@ -42,106 +42,6 @@ class inicio(LoginRequiredMixin, ListView):
 
 
 
-
-
-# class DetallePedidoCreate(TemplateView):
-#     template_name = 'pedido/crear_producto.html'
-
-
-#     def post(self, request, *args, **kwargs):
-#         # We make sure to call the parent's form_valid() method because
-#         # it might do some processing (in the case of CreateView, it will
-#         # call form.save() for example).
-#         codigo = request.POST.get('dtl_codigo')
-#         cantidad = request.POST.get('dtl_cantidad')
-
-#         mensaje=''
-#         pedido_conteo=0
-#         tipo_mensaje=False
-
-#         maximo_papeleria=self.request.user.suc_pertene.suc_monto_papeleria
-#         maximo_limpieza=self.request.user.suc_pertene.suc_monto_limpieza
-#         maximo_limpieza_consultorio=self.request.user.suc_pertene.suc_monto_limpieza_oficina
-
-#         producto=Producto.objects.get(prod_codigo=codigo)
-
-#         if producto.prod_tipo == 1:
-#             print('papeleria')
-#             # cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user).aggregate(suma_total=Sum(F('dtl_cantidad') * F('dtl_precio')))
-
-#             cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-
-#             if cuenta_now_papeleria['suma_total'] == None:
-#                 cuenta_now_papeleria['suma_total']=0
-#             cutn_tem_papeleria = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
-
-#             if cutn_tem_papeleria <= maximo_papeleria:
-#                 det_pedido=DetallePedido(
-#                 dtl_cantidad=cantidad,
-#                 dtl_codigo=codigo,
-#                 dtl_descripcion=producto.prod_descripcion,
-#                 dtl_precio=producto.prod_precio,
-#                 dtl_tipo=producto.prod_tipo,
-#                 dtl_creado_por=self.request.user,
-#                 )
-#                 det_pedido.save()
-#                 mensaje='Papeleria Completado'
-#                 tipo_mensaje=True
-#             else:
-#                 mensaje='Supera el máximo permitido para papeleria'
-#                 tipo_mensaje=False
-
-#         else:
-#             cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-#             if cuenta_now_limpieza['suma_total'] == None:
-#                 cuenta_now_limpieza['suma_total']=0
-
-#             cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-#             if cutn_tem_limpieza <= maximo_limpieza:
-#                 det_pedido=DetallePedido(
-#                     dtl_cantidad=cantidad,
-#                     dtl_codigo=codigo,
-#                     dtl_descripcion=producto.prod_descripcion,
-#                     dtl_precio=producto.prod_precio,
-#                     dtl_tipo=producto.prod_tipo,
-#                     dtl_creado_por=self.request.user,
-#                 )
-#                 det_pedido.save()
-#                 mensaje='Limpieza OK'
-#                 tipo_mensaje=True
-#             else:
-#                 cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-#                 if cuenta_now_limpieza['suma_total'] == None:
-#                     cuenta_now_limpieza['suma_total']=0
-#                 cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-#                 if cutn_tem_limpieza <= (maximo_limpieza_consultorio+maximo_limpieza):
-#                     det_pedido=DetallePedido(
-#                         dtl_cantidad=cantidad,
-#                         dtl_codigo=codigo,
-#                         dtl_descripcion=producto.prod_descripcion,
-#                         dtl_precio=producto.prod_precio,
-#                         dtl_tipo=producto.prod_tipo,
-#                         dtl_creado_por=self.request.user,
-#                     )
-#                     det_pedido.save()
-#                     mensaje='Limpieza consultorio OK'
-#                     tipo_mensaje=True
-#                 else:
-#                     mensaje='Supera el máximo permitido para Limpieza'
-#                     tipo_mensaje=False
-
-
-
-#         json = JsonResponse(
-#             {
-#                 'content':{
-#                     'mensaje': mensaje,
-#                     'conteo': pedido_conteo,
-#                     'tipo_mensaje': tipo_mensaje,
-#                 }
-#             }
-#         )
-#         return json
 class DetallePedidoCreate(TemplateView):
     template_name = 'pedido/crear_producto.html'
 
@@ -278,6 +178,13 @@ class ZonaList(LoginRequiredMixin, ListView):
         context['usuario']=self.request.user
         return context
 
+    def get_queryset(self):
+        queryset = super(ZonaList, self).get_queryset()
+        busqueda=self.request.GET.get('buscar')
+        if busqueda != None:
+            queryset=queryset.filter(zona_nombre__icontains=busqueda)
+        return queryset
+
     @method_decorator(permission_required('empresa.view_zona',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
                 return super(ZonaList, self).dispatch(*args, **kwargs)
@@ -330,6 +237,14 @@ class SucursalList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    def get_queryset(self):
+        queryset = super(SucursalList, self).get_queryset()
+        busqueda=self.request.GET.get('buscar')
+        if busqueda != None:
+            queryset=queryset.filter(Q(suc_nombre__icontains=busqueda) | Q(suc_zona__zona_nombre__icontains=busqueda))
+        return queryset
+
     @method_decorator(permission_required('empresa.view_sucursal',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
                 return super(SucursalList, self).dispatch(*args, **kwargs)
@@ -410,14 +325,39 @@ class PedidoCompraSuc(ListView):
 
         return context
     def get_queryset(self):
+        from datetime import datetime, date
+        import calendar
+        # ESTABLECEMOS LA FECHA ACTUAL
+        today = datetime.now()
+        # CONSULTAMOS CUAL ES EL ULTIMO DIA DEL MES ACTUAL
+        last_day=calendar.monthrange(today.year, today.month)[1]
+        # INICIALIZAMOS LA FECHA INICIAL
+        start_date = datetime(today.year, today.month, 1)
+        # INICIALIZAMOS LA FECHA FINAL
+        end_date = datetime(today.year, today.month, last_day)
+        
+
         queryset = super(PedidoCompraSuc, self).get_queryset()
         tipo = self.kwargs['tipo']
         if tipo == 1:
-            queryset = queryset.filter(prod_tipo=1)
+            queryset = queryset.filter(prod_tipo=1,prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=1, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count > 0:
+                queryset = ''
         elif tipo == 2:
-            queryset = queryset.filter(prod_tipo=2)
+            queryset = queryset.filter(prod_tipo=2, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=2, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count > 0:
+                queryset = ''
         elif tipo == 3:
-            queryset = queryset.filter(prod_tipo=2)
+            queryset = queryset.filter(prod_tipo=2, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=3, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count > 0:
+                queryset = ''
+            
+            
+            
+            
 
         return queryset
 

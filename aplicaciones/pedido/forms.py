@@ -21,7 +21,7 @@ class PedidoForm(forms.ModelForm):
         # 'prod_descripcion': forms.Textarea(),
         # }
     def __init__(self, *args, **kwargs):
-        super(ProductoForm, self).__init__(*args, **kwargs)
+        super(PedidoForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
             self.fields[field].required = True
@@ -33,6 +33,14 @@ class DetallePedidoForm(forms.ModelForm):
         fields = ('dtl_cantidad', 'dtl_codigo')
     def __init__(self, *args, **kwargs):
         super(DetallePedidoForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+class DetallePedidoFormEdit(forms.ModelForm):
+    class Meta:
+        model = DetallePedido
+        fields = ('dtl_id_pedido','dtl_cantidad')
+    def __init__(self, *args, **kwargs):
+        super(DetallePedidoFormEdit, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
 
@@ -48,6 +56,7 @@ class ConfForm(forms.ModelForm):
         super(ConfForm, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+
 class ConfFormEdit(forms.ModelForm):
     class Meta:
         model = Configuracion_pedido

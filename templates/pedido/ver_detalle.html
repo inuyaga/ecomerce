@@ -15,8 +15,22 @@
       <th scope="row">{{art.dtl_codigo}}</th>
       <td>{{art.dtl_descripcion}}</td>
       <td>{{art.dtl_cantidad}}</td>
+      <td>
+        {% if perms.pedido.change_detallepedido %}
+        <a class="btn btn-primary" href="{% url 'pedido:detalle_pedido_update' art.dtl_id_detalle art.dtl_id_pedido %}" role="button"><i class="material-icons">edit</i></a>
+        {% endif %}
+        {% if perms.pedido.delete_detallepedido %}
+        <a class="btn btn-danger" href="{% url 'pedido:detalle_pedido_delete' art.dtl_id_detalle art.dtl_id_pedido %}" role="button"><i class="material-icons">delete_forever</i></a>
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
+    <tr>
+      <th scope="row"></th>
+      <td></td>
+      <td><strong>Partidas: </strong>{{suma_total_partids.dtl_cantidad__sum}}</td>
+      <td><strong>Total: </strong>{{suma_total.dtl_precio__sum}}</td>
+    </tr>
 
   </tbody>
 </table>
