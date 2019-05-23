@@ -9,7 +9,7 @@ urlpatterns = [
     path('Producto/update/<int:pk>',views.ProductoUpdate.as_view(),name="changue_producto"),
     path('Producto/delete/<int:pk>',views.ProductoDelete.as_view(),name="delete_producto"),
     path('pedido/list/',views.PedidoList.as_view(),name="listar_pedido"),
-    path('pedido/list/delete/',views.PedidoDeleteRechazado.as_view(),name="listar_pedido_delete"),
+    path('pedido/list/delete/',views.PedidoDeleteRechazado.as_view(),name="listar_pedido_delete"), 
     path('Carrito/',views.CarritoLista.as_view(),name="carrito"),
 
     path('delete_datailproducto/<int:pk>/',views.CarritoDelete.as_view(),name="delete_datailproducto"),
@@ -28,4 +28,5 @@ urlpatterns = [
     path('configuracion/pedido/create/',views.ConfigCreate.as_view(),name="configuracion_pedido_crea"),
 
     path('configuracion/pedido/update/<int:pk>/',views.ConfigUpdate.as_view(),name="configuracion_pedido_update"),
+    path('pedidos/genera/pdf/',views.GeneraValuesJsonPedidos.as_view(),name="genera_pdf"),
 ]

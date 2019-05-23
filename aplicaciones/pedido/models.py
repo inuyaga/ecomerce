@@ -14,12 +14,12 @@ class Producto(models.Model):
     def __str__(self):
             return self.prod_codigo
 
-class Pedido(models.Model):
+class Pedido(models.Model): 
     ped_id_ped=models.AutoField(primary_key=True)
     ped_id_Suc=models.ForeignKey(Sucursal, verbose_name="Sucursales", on_delete=models.CASCADE)
     ped_fechaCreacion=models.DateTimeField("Fecha de creación", auto_now_add=True)
     ped_fechaAutorizacion= models.DateTimeField("Fecha de autorización",blank=True, null=True)
-    ped_fechaCancelacion= models.DateTimeField("Fecha de cancelación",blank=True, null=True)
+    ped_fechaCancelacion= models.DateTimeField("Fecha de cancelación",blank=True, null=True) 
     ESTADOPEDIDO=((1,"Pendiente por autorizar"),(2,"Autorizado"),(3,"Facturado"),(4,"Rechazado"),(5,"Entregado"), (6,"Excel descargado"))
     ped_estatusPedido=models.IntegerField(choices=ESTADOPEDIDO, default=1)
     ped_autorizo_fuera_tiempo=models.BooleanField(default=False)
@@ -32,6 +32,8 @@ class Pedido(models.Model):
     ped_fechaSubidaFac=models.DateTimeField("Carga de factura", blank=True, null=True)
     TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"))
     dtl_tipo_pedido=models.IntegerField(choices=TIPO_PEDIDO, default=0)
+    TIPO_INSUMO=((800044556,"Insumos Pedido Mensual"),(800044563,"Papeleria Pedido Mensual"))
+    pedido_tipo_insumo=models.IntegerField(choices=TIPO_INSUMO, default=800044556)
     def __str__(self):
         return str(self.ped_id_ped)
 

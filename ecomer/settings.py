@@ -136,3 +136,10 @@ STATICFILES_DIRS = (
 STATIC_ROOT =os.path.join(BASE_DIR, '/static/')
 
 LOGIN_REDIRECT_URL = '/'
+
+
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'maya.hosting-mexico.net'
+EMAIL_HOST_USER = 'soporte@computel.com.mx'
+EMAIL_HOST_PASSWORD = 'S1st3m45ccs'
+EMAIL_PORT = 465

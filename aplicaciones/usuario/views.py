@@ -11,11 +11,16 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeForm, PasswordResetConfirmView
 from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.db.models import Q
+
+from django.core.mail import send_mail, EmailMultiAlternatives
 # Create your views here.
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+
 
 class CreateUser(LoginRequiredMixin, CreateView):
     login_url = '/login/'
-    redirect_field_name = 'redirect_to'
+    redirect_field_name = 'redirect_to' 
     model = UserAdmin
     form_class = UserForm
     template_name = 'admin/crear_usuarios.html'
@@ -25,6 +30,32 @@ class CreateUser(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+    def form_valid(self, form):
+        
+        # message = render_to_string('email_template.html', {'user': form.instance.username, 'pass': form.instance.password, 'url': url})
+
+        # email = send_mail('Creacion de usuario', message, 'soporte@computel.com.mx', [form.instance.email])
+        # email.send()
+        current_site = str(get_current_site(self.request))
+        url="http://{}".format(current_site)
+
+        subject, from_email, to = 'Creacion de usuario', 'soporte@computel.com.mx', form.cleaned_data['email']
+        text_content = 'Creacion de usuario de'
+        html_content = render_to_string('email_template.html', 
+                                        {
+                                        'user': form.cleaned_data['username'], 
+                                        'pass': form.cleaned_data['password1'], 
+                                        'url': url,
+                                        'sitio': current_site
+                                        })
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+        self.object = form.save()
+        return super().form_valid(form)
+
+    
+
 
     @method_decorator(permission_required('usuario.add_user',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
