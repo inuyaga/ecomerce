@@ -22,9 +22,6 @@
     
      {% if comparacion %}
 
-     {% if object_list %}
-
-
 
      {% for producto in object_list %}
      <div class="col-3">
@@ -49,12 +46,14 @@
          </div>
      </div>
 
-     {% endfor %}
-     {% else %} 
+     {% empty %}
      <div class="container">
-         <h3 class="text-success">Actualmente existe un pedido realizado al mes correspondiente de {% now "F Y" %}</h3>
-     </div>
-     {% endif %}
+        <h3 class="text-success">Actualmente existe un pedido realizado al mes correspondiente de {% now "F Y" %}</h3>
+    </div>
+     {% endfor %}
+
+     
+ 
  </div>
 
 

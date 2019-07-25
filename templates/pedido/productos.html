@@ -31,7 +31,7 @@
                         <a href="{% url 'pedido:changue_producto' prod.id %}">{{prod.prod_codigo}}</a>
 
                     </th>
-                    <td>{{prod.prod_descripcion}}</td>
+                    <td>{{prod.prod_descripcion|truncatewords:5}}</td>
                     <td>{{prod.prod_precio}}</td>
                     <td>{{prod.get_prod_tipo_display}}</td>
                     <td>

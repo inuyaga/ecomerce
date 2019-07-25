@@ -82,9 +82,21 @@
                                     </li>
                                     {% endif %}
 
+                                    {% if user.is_superuser %}
+                                    <li>
+                                        <a href="{% url 'pedido:genera_report' %}">Reportes</a>
+                                    </li>
+                                    {% endif %}
+
                                     {% if perms.pedido.view_configuracion_pedido %}
                                     <li>
                                         <a href="{% url 'pedido:configuracion_pedido' %}">Configurar</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if perms.pedido.delete_pedido  %}
+                                    <li>
+                                        <a href="{% url 'pedido:listar_pedido_delete' %}">Eliminar pedidos
+                                            rechazados</a>
                                     </li>
                                     {% endif %}
                                 </ul>
@@ -182,8 +194,8 @@
                                         </div>
                                         {% endif %}
                                         <div class="account-dropdown__item">
-                                                <a href="{% url 'usuarios:user_update_password' %}">
-                                                    <i class="zmdi zmdi-account"></i>Cambiar contraseña</a>
+                                            <a href="{% url 'usuarios:user_update_password' %}">
+                                                <i class="zmdi zmdi-account"></i>Cambiar contraseña</a>
                                         </div>
 
                                     </div>
@@ -215,45 +227,55 @@
             {% endif %}
             {% else %}
 
-                <div class="container">
-                    <br>
-                    <div class="row justify-content-md-center">
-                        <h3>Crear nuevo pedido</h3>
+            <div class="container">
+                <br>
+                <div class="row justify-content-md-center">
+                    <h3>Crear nuevo pedido</h3>
+                </div>
+                <br>
+                <div class="row justify-content-md-center">
+                    <div class="col-sm-3">
+                        <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 3 %}">
+                                <div class="img"><img src="{% static 'images/limpieza-hogar.jpg' %}" alt="img">
+                                </div>
+                                <div class="info">
+                                    <h3>Limpieza</h3>
+                                    <p>Consultorio</p>
+                                </div>
+                            </a></div>
                     </div>
-                    <br>
-                    <div class="row justify-content-md-center">
-                        <div class="col-sm-4">
-                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 3 %}">
-                                    <div class="img"><img src="{% static 'images/limpieza-hogar.jpg' %}" alt="img">
-                                    </div>
-                                    <div class="info">
-                                        <h3>Limpeza</h3>
-                                        <p>Consultorio</p>
-                                    </div>
-                                </a></div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 2 %}">
-                                    <div class="img"><img src="{% static 'images/limpieza.jpg' %}" alt="img">
-                                    </div>
-                                    <div class="info">
-                                        <h3>Limpieza</h3>
-                                        <p>Sucursal</p>
-                                    </div>
-                                </a></div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 1 %}">
-                                    <div class="img"><img src="{% static 'images/papeleria.jpg' %}" alt="img">
-                                    </div>
-                                    <div class="info">
-                                        <h3>Papeleria</h3>
-                                        <p>Sucursal</p>
-                                    </div>
-                                </a></div>
-                        </div>
+                    <div class="col-sm-3">
+                        <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 2 %}">
+                                <div class="img"><img src="{% static 'images/limpieza.jpg' %}" alt="img">
+                                </div>
+                                <div class="info">
+                                    <h3>Limpieza</h3>
+                                    <p>Sucursal</p>
+                                </div>
+                            </a></div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 1 %}">
+                                <div class="img"><img src="{% static 'images/papeleria.jpg' %}" alt="img">
+                                </div>
+                                <div class="info">
+                                    <h3>Papeleria</h3>
+                                    <p>Sucursal</p>
+                                </div>
+                            </a></div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="ih-item circle effect6 scale_up"><a href="{% url 'empresa:detl_compra_suc' 4 %}">
+                                <div class="img"><img src="{% static 'images/consumibles.png' %}" alt="img">
+                                </div>
+                                <div class="info">
+                                    <h3>Toner</h3>
+                                    <p>Sucursal</p>
+                                </div>
+                            </a></div>
                     </div>
                 </div>
+            </div>
 
             {% endif %}
 
@@ -261,7 +283,7 @@
 
 
 
-    </div>
+        </div>
 
 
 

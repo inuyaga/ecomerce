@@ -61,6 +61,7 @@ class DetallePedidoCreate(TemplateView):
         maximo_papeleria=self.request.user.suc_pertene.suc_monto_papeleria
         maximo_limpieza=self.request.user.suc_pertene.suc_monto_limpieza
         maximo_limpieza_consultorio=self.request.user.suc_pertene.suc_monto_limpieza_oficina
+        maximo_consumible=self.request.user.suc_pertene.suc_monto_consumible
 
         producto=Producto.objects.get(prod_codigo=codigo)
 
@@ -132,6 +133,29 @@ class DetallePedidoCreate(TemplateView):
                 tipo_mensaje=True
             else:
                 mensaje='Supera el máximo permitido para Limpieza'
+                tipo_mensaje=False
+
+        elif tipo_pedido == '4':
+            cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=4, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+            if cuenta_now_limpieza['suma_total'] == None:
+                cuenta_now_limpieza['suma_total']=0
+
+            cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+            if cutn_tem_limpieza <= maximo_consumible:
+                det_pedido=DetallePedido(
+                    dtl_cantidad=cantidad,
+                    dtl_codigo=codigo,
+                    dtl_descripcion=producto.prod_descripcion,
+                    dtl_precio=producto.prod_precio,
+                    dtl_tipo=producto.prod_tipo,
+                    dtl_creado_por=self.request.user,
+                    dtl_tipo_pedido=4,
+                )
+                det_pedido.save()
+                mensaje='Consumible OK'
+                tipo_mensaje=True
+            else:
+                mensaje='Supera el máximo permitido para Consumibles' 
                 tipo_mensaje=False
 
 
@@ -325,7 +349,7 @@ class PedidoCompraSuc(ListView):
 
         return context
     def get_queryset(self):
-        from datetime import datetime, date
+        from datetime import datetime, date 
         import calendar
         # ESTABLECEMOS LA FECHA ACTUAL
         today = datetime.now()
@@ -340,24 +364,27 @@ class PedidoCompraSuc(ListView):
         queryset = super(PedidoCompraSuc, self).get_queryset()
         tipo = self.kwargs['tipo']
         if tipo == 1:
-            queryset = queryset.filter(prod_tipo=1,prod_estado_producto=True)
+            queryset = queryset.filter(prod_v_papeleria=True,prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=1, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             if pedido_count > 0:
-                queryset = ''
+                queryset = Producto.objects.none()
         elif tipo == 2:
-            queryset = queryset.filter(prod_tipo=2, prod_estado_producto=True)
+            queryset = queryset.filter(prod_v_limpieza=True, prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=2, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             if pedido_count > 0:
-                queryset = ''
+                queryset = Producto.objects.none()
         elif tipo == 3:
-            queryset = queryset.filter(prod_tipo=2, prod_estado_producto=True)
+            queryset = queryset.filter(prod_v_limpieza_consultorio=True, prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=3, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
             if pedido_count > 0:
-                queryset = ''
+                queryset = Producto.objects.none()
+        elif tipo == 4:
+            queryset = queryset.filter(prod_v_consumibles=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=4, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             
-            
-            
-            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
 
         return queryset
 

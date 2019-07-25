@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, TemplateView, DetailView, View
 from aplicaciones.pedido.models import *
-from aplicaciones.pedido.forms import *
+from aplicaciones.pedido.forms import *  
 from django.urls import reverse_lazy, reverse
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
 from django.contrib.auth.decorators import permission_required
@@ -13,6 +13,23 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from django.db.models import Q
 from django.http import JsonResponse
+from django.contrib import messages
+
+from django.conf import settings
+from io import BytesIO
+# //////////////////////////////////////
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+# ////////////////////////////////////////
+import os
+#Librerias reportlab a usar:
+from reportlab.platypus import (SimpleDocTemplate, PageBreak, Image, Spacer,
+Paragraph, Table, TableStyle)
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4, letter, landscape
+from reportlab.lib import colors
 
 
 class ProductoLista(LoginRequiredMixin, ListView):
@@ -106,46 +123,118 @@ class PedidoList(LoginRequiredMixin, ListView):
         context['usuario'] = self.request.user
         return context
 
-    def get_queryset(self):
+    def get_queryset(self): 
+
         queryset = super(PedidoList, self).get_queryset()
         status = self.request.GET.get('status')
         tipo_pedido = self.request.GET.get('tipo_pedido')
+        inicio = self.request.GET.get('inicio')
+        fin = self.request.GET.get('fin')        
 
         if self.request.user.is_superuser or self.request.user.tipo_user == 2:
-            queryset = queryset.filter(ped_estatusPedido=1)
-            if status != None:
-                queryset = Pedido.objects.filter(ped_estatusPedido=status)
-                if status == '0':
-                    queryset = Pedido.objects.all()
-            if tipo_pedido != None:
-                queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+            if len(self.request.GET) == 0:
+                queryset = queryset.filter(ped_estatusPedido=1)
 
+            if status != '0':
+                queryset = queryset.filter(ped_estatusPedido=status)
+            
+            if inicio !=None and fin != None:
+                queryset=queryset.filter(ped_fechaCreacion__range=(inicio, fin))
+            
+            if tipo_pedido != '0':
+                queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+                    
+                
+         
         elif self.request.user.tipo_user == 1:
             id_zona = self.request.user.zona_pertene
-            queryset_init = queryset.filter(ped_id_Suc__suc_zona=id_zona)
-            queryset = queryset.filter(
-                ped_id_Suc__suc_zona=id_zona, ped_estatusPedido=1)
+            queryset = queryset.filter(ped_id_Suc__suc_zona=id_zona)
 
-            if status != None:
-                queryset = queryset_init.filter(ped_estatusPedido=status)
-                if status == '0':
-                    queryset = queryset_init
-            if tipo_pedido != None:
+            if len(self.request.GET) == 0:
+                queryset = queryset.filter(ped_estatusPedido=1)
+            if inicio !=None and fin != None:
+                queryset=queryset.filter(ped_fechaCreacion__range=(inicio, fin))
+            if status != '0':
+                queryset = queryset.filter(ped_estatusPedido=status)
+                    
+            if tipo_pedido != '0':
                 queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+                    
 
         elif self.request.user.tipo_user == 3:
             id_suc = self.request.user.suc_pertene
-            queryset_init = queryset.filter(ped_id_Suc=id_suc)
-            queryset = queryset.filter(ped_id_Suc=id_suc, ped_estatusPedido=1)
+            queryset = queryset.filter(ped_id_Suc=id_suc)
 
-            if status != None:
-                queryset = queryset_init.filter(ped_estatusPedido=status)
-                if status == '0':
-                    queryset = queryset_init
-            if tipo_pedido != None:
+            if len(self.request.GET) == 0:
+                queryset = queryset.filter(ped_estatusPedido=1)
+            if inicio !=None and fin != None:
+                queryset=queryset.filter(ped_fechaCreacion__range=(inicio, fin))
+            if status != '0':
+                queryset = queryset.filter(ped_estatusPedido=status)
+            if tipo_pedido != '0':
                 queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+                    
 
+        
         return queryset
+
+
+
+class ReporteDetallePedido(View):
+    def get(self, request, *args, **kwargs):
+        from django.contrib.humanize.templatetags.humanize import intcomma
+        print ("Genero el PDF")
+        response = HttpResponse(content_type='application/pdf')
+        pdf_name = "clientes.pdf"  # llamado clientes
+        # la linea 26 es por si deseas descargar el pdf a tu computadora
+        # response['Content-Disposition'] = 'attachment; filename=%s' % pdf_name
+        buff = BytesIO()
+        doc = SimpleDocTemplate(buff,
+                                pagesize=letter,
+                                rightMargin=40,
+                                leftMargin=40,
+                                topMargin=60,
+                                bottomMargin=18,
+                                )
+        items = []
+        styles = getSampleStyleSheet()
+        total_detalles=DetallePedido.objects.filter(dtl_id_pedido=request.GET.get('pedido_id')).aggregate(total=Sum(F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField()))
+        
+        header = Paragraph("DETALLE DE PEDIDO N°"+request.GET.get('pedido_id'), styles['Heading1'])
+        pedido_get=Pedido.objects.get(ped_id_ped=request.GET.get('pedido_id'))
+        sucursal_num = pedido_get.ped_id_Suc.suc_numero
+        sucursal_direccion = pedido_get.ped_id_Suc.suc_direccion
+
+        txt_sucursal_num=Paragraph('N° de Sucursal: '+'N/A' if sucursal_num == None else  'N° de Sucursal: '+sucursal_num, styles['Heading4'])
+        txt_sucursal_direccion=Paragraph('Direccion: '+'N/A' if sucursal_direccion == None else 'Direccion: '+sucursal_direccion, styles['Heading4'])
+        items.append(header)
+        items.append(txt_sucursal_num)
+        items.append(txt_sucursal_direccion)
+        headings = ('Codigo', 'Descripción', 'Cantidad', 'Precio', 'Subtotal')
+        query_result = [(p.dtl_codigo, Paragraph(p.dtl_descripcion, styles['BodyText']), p.dtl_cantidad,p.dtl_precio, round(p.dtl_cantidad*p.dtl_precio, 2)) for p in DetallePedido.objects.filter(dtl_id_pedido=request.GET.get('pedido_id'))]
+        
+        total=0
+        if total_detalles['total'] != None:
+            total=round(total_detalles['total'], 2)
+    
+            
+
+        final_line=[('','','',Paragraph("Total", styles['Heading5']),Paragraph(intcomma(total), styles['Heading5']))]
+
+        t = Table([headings] + query_result+final_line, colWidths=[2.5 * cm, 10 * cm, 2 * cm, 2 * cm, 2 * cm])
+        t.setStyle(TableStyle(
+            [
+                ('GRID', (0, 0), (4, -1), 1, colors.dodgerblue),
+                ('LINEBELOW', (0, 0), (-1, 0), 2, colors.darkblue),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.dodgerblue)
+            ]
+        ))
+        items.append(t)
+        doc.build(items)
+        response.write(buff.getvalue())
+        buff.close()
+        return response
+        
 
 
 class CarritoLista(LoginRequiredMixin, ListView):
@@ -163,6 +252,8 @@ class CarritoLista(LoginRequiredMixin, ListView):
             dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
         context['ped_lim_sucursal'] = DetallePedido.objects.filter(
             dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
+        context['ped_consumibles'] = DetallePedido.objects.filter(
+            dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4)
 
         return context
 
@@ -173,8 +264,19 @@ class CarritoLista(LoginRequiredMixin, ListView):
         return queryset
 
     def post(self, request, *args, **kwargs):
+        from datetime import datetime, date 
+        import calendar
+        # ESTABLECEMOS LA FECHA ACTUAL
+        today = datetime.now()
+        # CONSULTAMOS CUAL ES EL ULTIMO DIA DEL MES ACTUAL
+        last_day=calendar.monthrange(today.year, today.month)[1]
+        # INICIALIZAMOS LA FECHA INICIAL
+        start_date = datetime(today.year, today.month, 1)
+        # INICIALIZAMOS LA FECHA FINAL
+        end_date = datetime(today.year, today.month, last_day)
 
         tipo_pedido = request.POST.get('tipo_pedido')
+        # pedido_count=Pedido.objects.filter(dtl_tipo_pedido=1, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
 
         if tipo_pedido == 'papeleria':
             pedido = Pedido(
@@ -183,29 +285,43 @@ class CarritoLista(LoginRequiredMixin, ListView):
                 dtl_tipo_pedido=1,
                 pedido_tipo_insumo=800044563,
             )
-            pedido.save()
-
-            DetallePedido.objects.filter(
-                dtl_creado_por=self.request.user,
-                dtl_status=False, dtl_tipo_pedido=1).update(dtl_status=True, dtl_id_pedido=pedido)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=1, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user,dtl_status=False, dtl_tipo_pedido=1).update(dtl_status=True, dtl_id_pedido=pedido)
+            
         if tipo_pedido == 'sucursal':
             pedido = Pedido(
                 ped_id_Suc=self.request.user.suc_pertene,
                 ped_id_UsuarioCreo=self.request.user,
                 dtl_tipo_pedido=2,
             )
-            pedido.save()
-            DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2).update(
-                dtl_status=True, dtl_id_pedido=pedido)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=2, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2).update(dtl_status=True, dtl_id_pedido=pedido)
+            
         if tipo_pedido == 'consultorio':
             pedido = Pedido(
                 ped_id_Suc=self.request.user.suc_pertene,
                 ped_id_UsuarioCreo=self.request.user,
                 dtl_tipo_pedido=3,
             )
-            pedido.save()
-            DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3).update(
-                dtl_status=True, dtl_id_pedido=pedido)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=3, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3).update(dtl_status=True, dtl_id_pedido=pedido)
+
+        if tipo_pedido == 'consumible':
+            pedido = Pedido(
+                ped_id_Suc=self.request.user.suc_pertene,
+                ped_id_UsuarioCreo=self.request.user,
+                dtl_tipo_pedido=4,
+            )
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=4, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4).update(dtl_status=True, dtl_id_pedido=pedido)
 
         url = reverse_lazy('pedido:carrito')
         return redirect(url)
@@ -284,8 +400,7 @@ class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
             ws.column_dimensions[get_column_letter(col)].width = value
 
         ahora = datetime.datetime.now()
-        Pedido.objects.filter(ped_id_ped=id_pedido).update(
-            ped_estatusPedido=6, ped_id_usr_descargo_excel=self.request.user)
+        Pedido.objects.filter(ped_id_ped=id_pedido).update(ped_estatusPedido=6, ped_id_usr_descargo_excel=self.request.user)
         nombre_archivo = 'pedido_no_'+str(id_pedido)+'.xls'
         response = HttpResponse(content_type="application/ms-excel")
         content = "attachment; filename = {0}".format(nombre_archivo)
@@ -306,11 +421,10 @@ class DetallePedidolit(LoginRequiredMixin, TemplateView):
         id_pedido = self.kwargs.get('pk')
         context['articulos'] = DetallePedido.objects.filter(
             dtl_id_pedido=id_pedido)
-        context['suma_total'] = DetallePedido.objects.filter(
-            dtl_id_pedido=id_pedido).aggregate(Sum('dtl_precio'))
-        context['suma_total_partids'] = DetallePedido.objects.filter(
-            dtl_id_pedido=id_pedido).aggregate(Sum('dtl_cantidad'))
-        return context
+        context['suma_total'] = DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(total= Sum(F('dtl_precio')*F('dtl_cantidad'), output_field=FloatField()))['total']
+        context['suma_total_partids'] = DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(Sum('dtl_cantidad'))
+        print(context['suma_total'])
+        return context 
 
 
 class DetallePeditoEliminar(DeleteView):
@@ -361,6 +475,7 @@ class AutorizarPedido(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         from datetime import datetime
+        from django.contrib.humanize.templatetags.humanize import naturalday
         ahora = datetime.now()
         id_pedido = self.kwargs.get('pk')
         confs = Configuracion_pedido.objects.all()
@@ -369,8 +484,8 @@ class AutorizarPedido(LoginRequiredMixin, TemplateView):
                 Pedido.objects.filter(ped_id_ped=id_pedido).update(
                     ped_estatusPedido=2, ped_id_UsuarioAutorizo=self.request.user, ped_fechaAutorizacion=ahora)
             else:
-                Pedido.objects.filter(ped_id_ped=id_pedido).update(
-                    ped_estatusPedido=2, ped_id_UsuarioAutorizo=self.request.user, ped_fechaAutorizacion=ahora, ped_autorizo_fuera_tiempo=True)
+                messages.error(request, 'No puede autorizar fuera de tiempo, fecha limite '+ naturalday(config.conf_fecha_fin_autorizador))
+
 
         rev = reverse_lazy('pedido:listar_pedido')
         return redirect(rev)
@@ -531,3 +646,215 @@ class GeneraValuesJsonPedidos(View):
                     'status': False,
                 }
                 return JsonResponse(data, status=400)
+
+
+class ReportPedido(TemplateView): 
+    template_name = 'pedido/report_gen.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        inicio=self.request.GET.get('inicio')
+        fin=self.request.GET.get('fin')
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+
+        query = DetallePedido.objects.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin), dtl_id_pedido__ped_estatusPedido__in=status)
+        if tipo_pedido != '0':
+            query = query.filter(dtl_id_pedido__dtl_tipo_pedido=tipo_pedido)
+        
+        context['obj_list']=query
+                
+            
+        return context
+class DowloadReport(View):
+    def get(self, request, *args, **kwargs):
+        from openpyxl.utils import get_column_letter
+        from openpyxl.styles import PatternFill, fills
+        import datetime
+        from django.contrib.humanize.templatetags.humanize import naturalday
+        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles'}
+        wb = Workbook()
+        ws = wb.active
+        
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+        
+        inicio = datetime.datetime.strptime(request.GET.get('inicio'), '%Y-%m-%d').date()
+        fin = datetime.datetime.strptime(request.GET.get('fin'), '%Y-%m-%d').date()
+
+        ped_list = DetallePedido.objects.filter(dtl_id_pedido__ped_estatusPedido__in=status).values(
+        'dtl_id_pedido', 
+        'dtl_id_pedido__ped_fechaCreacion',
+        'dtl_id_pedido__ped_id_Suc__suc_nombre',
+        'dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre',
+        'dtl_id_pedido__ped_id_UsuarioCreo__username',
+        'dtl_id_pedido__dtl_tipo_pedido',
+        'dtl_id_pedido__ped_id_UsuarioAutorizo__username'
+        ).annotate(total_vent=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
+        if tipo_pedido == '0':
+            ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin))
+        else:
+            ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin), dtl_id_pedido__dtl_tipo_pedido=tipo_pedido)
+        
+
+        ws['A1'] = 'Reporte de Pedidos '+naturalday(inicio)+' al '+naturalday(fin)
+        st = ws['A1']
+        st.font = Font(size=14, b=True, color="004ee0")
+        
+
+        st.alignment = Alignment(horizontal='center')
+        ws.merge_cells('A1:H1')
+        ws.sheet_properties.tabColor = "1072BA"
+
+        ws['A2'] = 'No. Pedido'
+        ws['B2'] = 'Fecha Pedido'
+        ws['C2'] = 'Sucursal'
+        ws['D2'] = 'Zona'
+        ws['E2'] = 'Usuario'
+        ws['F2'] = 'Tipo'
+        ws['G2'] = 'Autorizó'
+        ws['H2'] = 'Total'
+
+        ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['C2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['D2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['E2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['F2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['G2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['H2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+
+
+        
+        cont = 3
+        for pedido in ped_list:
+            ws.cell(row=cont, column=1).value = pedido['dtl_id_pedido']
+            ws.cell(row=cont, column=2).value = str(naturalday(pedido['dtl_id_pedido__ped_fechaCreacion']))
+            ws.cell(row=cont, column=3).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_nombre'])
+            ws.cell(row=cont, column=4).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre'])
+            ws.cell(row=cont, column=5).value = str(pedido['dtl_id_pedido__ped_id_UsuarioCreo__username'])
+            ws.cell(row=cont, column=6).value = str(TIPO_PEDIDO[pedido['dtl_id_pedido__dtl_tipo_pedido']])
+            ws.cell(row=cont, column=7).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
+            ws.cell(row=cont, column=8).value = pedido['total_vent']
+            ws.cell(row=cont, column=8).number_format = '#,##0'
+
+            ws.cell(row=cont, column=1).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=2).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=3).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=4).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=5).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=6).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=7).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=8).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            
+            cont += 1
+            ws['A'+str(cont)] = '##'
+            ws['B'+str(cont)] = 'Sucursal'
+            ws['C'+str(cont)] = 'Zona'
+            ws['D'+str(cont)] = 'Producto'
+            ws['E'+str(cont)] = 'Descripcion'
+            ws['F'+str(cont)] = 'Cantidad'
+            ws['G'+str(cont)] = 'Precio'
+            ws['H'+str(cont)] = 'SubTotal'
+
+            ws['A'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['B'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['C'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['D'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['E'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['F'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['G'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['H'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            cont += 1
+            for detalle in DetallePedido.objects.filter(dtl_id_pedido=pedido['dtl_id_pedido']):
+                ws.cell(row=cont, column=1).value = str(detalle.dtl_id_pedido)
+                ws.cell(row=cont, column=2).value = str(detalle.dtl_id_pedido.ped_id_Suc)
+                ws.cell(row=cont, column=3).value = str(detalle.dtl_id_pedido.ped_id_Suc.suc_zona)
+                ws.cell(row=cont, column=4).value = str(detalle.dtl_codigo)
+                ws.cell(row=cont, column=5).value = str(detalle.dtl_descripcion)
+                ws.cell(row=cont, column=6).value = detalle.dtl_cantidad
+                ws.cell(row=cont, column=7).value = detalle.dtl_precio
+                ws.cell(row=cont, column=8).value = (detalle.dtl_cantidad * detalle.dtl_precio)
+                cont += 1
+
+
+        dims = {}
+        for row in ws.rows:
+            for cell in row:
+                if cell.value:
+                    if cell.row != 1:
+                        dims[cell.column] = max(
+                            (dims.get(cell.column, 0), len(str(cell.value))))
+
+        for col, value in dims.items():
+            ws.column_dimensions[get_column_letter(col)].width = value+1
+
+        
+        nombre_archivo = 'Reporte_de_Pedidos_'+naturalday(inicio)+'_al_'+naturalday(fin)+'.xls'
+        response = HttpResponse(content_type="application/ms-excel")
+        content = "attachment; filename = {0}".format(nombre_archivo)
+        response['Content-Disposition'] = content
+        wb.save(response)
+        return response
+
+class pdf_reporte_gen(View):
+    def get(self, request, *args, **kwargs):
+        from django.contrib.humanize.templatetags.humanize import intcomma
+        from django.contrib.humanize.templatetags.humanize import naturalday
+        print ("Genero el PDF")
+        response = HttpResponse(content_type='application/pdf')
+        pdf_name = "clientes.pdf"  # llamado clientes
+        # la linea 26 es por si deseas descargar el pdf a tu computadora
+        inicio=self.request.GET.get('inicio')
+        fin=self.request.GET.get('fin')
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+        query_resultado=Pedido.objects.filter(ped_fechaCreacion__range=(inicio, fin), ped_estatusPedido__in=status)
+        if tipo_pedido != '0':
+            query_resultado=query_resultado.filter(dtl_tipo_pedido=tipo_pedido)
+
+
+
+
+
+
+        buff = BytesIO()
+        doc = SimpleDocTemplate(buff,
+                                pagesize=landscape(letter),
+                                rightMargin=40,
+                                leftMargin=40,
+                                topMargin=60,
+                                bottomMargin=18,
+                                )
+        items = []
+        styles = getSampleStyleSheet()
+        
+        
+        header = Paragraph("DETALLE DE PEDIDOS", styles['Heading1'])
+        Paragraph("DETALLE DE PEDIDOS", styles['BodyText'])
+        items.append(header)
+    
+        headings = ('N° Pedido', 'Fecha Pedido', 'Sucursal', 'Zona', 'Tipo', 'Estatus', 'Total')
+        query_result = [(p.ped_id_ped, Paragraph(naturalday(p.ped_fechaCreacion), styles['BodyText']), Paragraph(str(p.ped_id_Suc), styles['BodyText']),Paragraph(str(p.ped_id_Suc.suc_zona), styles['BodyText']), Paragraph(p.get_dtl_tipo_pedido_display(), styles['BodyText']), Paragraph(p.get_ped_estatusPedido_display(), styles['BodyText']),intcomma(p.total_venta())) for p in query_resultado]
+        
+       
+    
+            
+
+        
+
+        t = Table([headings] + query_result, colWidths=[2 * cm, 4 * cm, 5 * cm, 6 * cm, 4 * cm, 4 * cm, 2 * cm])
+        t.setStyle(TableStyle(
+            [
+                ('GRID', (0, 0), (6, -1), 1, colors.dodgerblue),
+                ('LINEBELOW', (0, 0), (-1, 0), 2, colors.darkblue),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.dodgerblue)
+            ]
+        ))
+        items.append(t)
+        doc.build(items)
+        response.write(buff.getvalue())
+        buff.close()
+        return response
+

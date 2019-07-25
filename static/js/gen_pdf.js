@@ -1,3 +1,4 @@
+const codigos={'800044556':'Insumos Pedido Mensual','800044563':'Papeleria Pedido Mensual'}
 function genrar_pdf_pedidos() {
     var url = '/pedido/pedidos/genera/pdf/';
     var data = { fecha_inicio: $('#fecha_init').val(), fecha_fin:$('#fecha_fin').val() };
@@ -31,15 +32,12 @@ function renderiza_pdf(items) {
     var arreglo=[]
 
     $.each( items, function( key, value ) {
-        console.log( key + ": " + value.ped_id_ped );
         txt = `
-        N° Pedido: ${value.ped_id_ped} \n
-        N° de Sucursal: ${value.ped_id_Suc__suc_numero} \n
+        N° Pedido: ${value.ped_id_ped}      N° Pedido Computel:                     N° de Sucursal: ${value.ped_id_Suc__suc_numero} \n
         Nombre de Sucursal: ${value.ped_id_Suc__suc_nombre} \n
         Dirección de Sucursal: ${value.ped_id_Suc__suc_direccion} \n
-        Codigo: ${value.pedido_tipo_insumo} \n
-        Informacion de Contacto \n
-        \n
+        Codigo: ${value.pedido_tipo_insumo} ${codigos[value.pedido_tipo_insumo]}\n
+        Informacion de Contacto: Edith Raquel Perera Hdez ext. 1003 \n
         `;
         data={"id":txt}
         arreglo.push(data)

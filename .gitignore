@@ -103,3 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 env_ecomer/
+XDG_CACHE_HOME/

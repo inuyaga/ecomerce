@@ -15,6 +15,7 @@ class Sucursal(models.Model):
     suc_monto_papeleria=models.FloatField('Monto a comprar papeleria')
     suc_monto_limpieza=models.FloatField('Monto a comprar limpieza')
     suc_monto_limpieza_oficina=models.FloatField('Monto a comprar limpieza consultorio', default=0)
+    suc_monto_consumible=models.FloatField('Monto a comprar consumibles', default=0)
     suc_direccion=models.CharField('Direccion de sucursal', max_length=250, blank=True, null=True)
 
     def __str__(self):

@@ -26,7 +26,7 @@
 
 
 {% if ped_papeleria  %}
-<form action="" method="post">
+<form action="" method="post"> 
     {% csrf_token %}
     <input type="hidden" value="papeleria" name="tipo_pedido">
     <button type="submit" class="btn btn-primary">Confirmar pedido Papeleria!</button>
@@ -46,6 +46,15 @@
     <button type="submit" class="btn btn-info">Confirmar pedido Sucursal!</button>
 </form>
 {% endif %}
+
+{% if ped_consumibles  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="consumible" name="tipo_pedido">
+    <button type="submit" class="btn btn-info">Confirmar pedido Consumibles!</button>
+</form>
+{% endif %}
+
 </div>
 {% endblock contenido %}
 
