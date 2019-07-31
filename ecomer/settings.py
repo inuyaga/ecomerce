@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'ecomer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dj_ecomerce',
-        'USER': 'externo',
-        'PASSWORD': '0102261218',
-        'HOST': '192.168.1.228',
+        'NAME': 'ecomerce',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '',
         'PORT': '3306',
     }
 }
