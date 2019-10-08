@@ -1,3 +1,6 @@
 {
-    "python.pythonPath": "env_ec\\Scripts\\python.exe"
+    "python.pythonPath": "env_ecomer/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": ["--generate-members"],
+        
 }

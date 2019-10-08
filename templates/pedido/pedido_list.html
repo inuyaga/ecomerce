@@ -186,7 +186,7 @@
       </td>
 
       <td>
-        <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}"
+        <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}?{{view.request.GET.urlencode}}"
           title="Ver productos" role="button">
           <i class="material-icons">remove_red_eye</i>
         </a>
@@ -204,9 +204,9 @@
 
 
         {% if dato.ped_estatusPedido == 1 %}
-        <a class="btn btn-success btn-sm" href="{% url 'pedido:auto_pedido' dato.ped_id_ped %}" title="Autorizar"
+        <a class="btn btn-success btn-sm" href="{% url 'pedido:auto_pedido' dato.ped_id_ped %}?{{view.request.GET.urlencode}}" title="Autorizar"
           role="button"><i class="material-icons">thumb_up</i></a>
-        <a class="btn btn-danger btn-sm" href="{% url 'pedido:rechaza_pedido' dato.ped_id_ped %}" title="Rechazar"
+        <a class="btn btn-danger btn-sm" href="{% url 'pedido:rechaza_pedido' dato.ped_id_ped %}?{{view.request.GET.urlencode}}" title="Rechazar"
           role="button"><i class="material-icons">thumb_down</i></a>
         {% endif %}
 
@@ -220,7 +220,7 @@
         {% endif %}
 
         {% if dato.ped_estatusPedido == 6 %}
-        <a class="btn btn-success btn-sm" title="subir factura" href="{% url 'pedido:pedido_update' dato.ped_id_ped %}"
+        <a class="btn btn-success btn-sm" title="subir factura" href="{% url 'pedido:pedido_update' dato.ped_id_ped %}?{{view.request.GET.urlencode}}"
           role="button">
           <i class="material-icons">cloud_upload</i>
         </a>
@@ -229,7 +229,7 @@
         {% endif %}
 
       </td>
-      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}"
+      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}?{{view.request.GET.urlencode}}"
           role="button">Eliminar</a></td> {% endcomment %}
     </tr>
     {% endfor %}

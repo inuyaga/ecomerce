@@ -19,7 +19,7 @@ urlpatterns = [
     path('detalle_pedido/delete/<int:pk>/<int:pedo_id>/',views.DetallePeditoEliminar.as_view(),name="detalle_pedido_delete"),
     path('detalle_pedido/update/<int:pk>/<int:pedo_id>/',views.DetallePedidoEdit.as_view(),name="detalle_pedido_update"),
 
-    path('AutorizaPedido/<int:pk>/',views.AutorizarPedido.as_view(),name="auto_pedido"),
+    path('AutorizaPedido/<int:pk>/',views.AutorizarPedido.as_view(),name="auto_pedido"), 
     path('RechazaraPedido/<int:pk>/',views.RechazarPedido.as_view(),name="rechaza_pedido"),
     path('pedido_update/<int:pk>/',views.PedidoUpdate.as_view(),name="pedido_update"),
 

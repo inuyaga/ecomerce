@@ -488,14 +488,16 @@ class AutorizarPedido(LoginRequiredMixin, TemplateView):
 
 
         rev = reverse_lazy('pedido:listar_pedido')
-        return redirect(rev)
+        get_encode=self.request.GET.urlencode()
+        rev = rev +'?'+get_encode
+        return redirect(rev) 
 
     @method_decorator(permission_required('pedido.change_pedido', reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
         return super(AutorizarPedido, self).dispatch(*args, **kwargs)
 
 
-class RechazarPedido(LoginRequiredMixin, TemplateView):
+class RechazarPedido(LoginRequiredMixin, TemplateView): 
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     template_name = 'pedido/ver_detalle.html'
@@ -508,7 +510,7 @@ class RechazarPedido(LoginRequiredMixin, TemplateView):
             ped_estatusPedido=4, ped_id_UsuarioCancelo=self.request.user, ped_fechaCancelacion=ahora)
 
         rev = reverse_lazy('pedido:listar_pedido')
-        return redirect(rev)
+        return redirect(rev+'?'+self.request.GET.urlencode())
 
     @method_decorator(permission_required('pedido.change_pedido', reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
