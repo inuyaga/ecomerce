@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "env_ecomer/bin/python",
+    "python.pythonPath": "env\\Scripts\\python.exe",
     "python.linting.enabled": true,
     "python.linting.pylintArgs": ["--generate-members"],
         
