@@ -72,98 +72,103 @@ class DetallePedidoCreate(TemplateView):
             mensaje='Solo se puede agregar una pieza 019-068-611' 
             tipo_mensaje=False
         except ObjectDoesNotExist:
-            if tipo_pedido == '1':
-                cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-
-                if cuenta_now_papeleria['suma_total'] == None:
-                    cuenta_now_papeleria['suma_total']=0
-                cutn_tem_papeleria = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
-
-                if cutn_tem_papeleria <= maximo_papeleria:
-                    det_pedido=DetallePedido(
-                    dtl_cantidad=cantidad,
-                    dtl_codigo=codigo,
-                    dtl_descripcion=producto.prod_descripcion,
-                    dtl_precio=producto.prod_precio,
-                    dtl_tipo=producto.prod_tipo,
-                    dtl_creado_por=self.request.user,
-                    dtl_tipo_pedido=1,
-                    )
-                    det_pedido.save()
-                    mensaje='Papeleria Completado'
-                    tipo_mensaje=True
-                else:
-                    mensaje='Supera el máximo permitido para papeleria' 
+            if codigo == '019-068-611':
+                if cantidad > 1:
+                    mensaje='Solo se puede agregar una pieza 019-068-611' 
                     tipo_mensaje=False
+                else:                    
+                    if tipo_pedido == '1':
+                        cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
 
-            elif tipo_pedido == '2':
-                cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-                if cuenta_now_limpieza['suma_total'] == None:
-                    cuenta_now_limpieza['suma_total']=0
+                        if cuenta_now_papeleria['suma_total'] == None:
+                            cuenta_now_papeleria['suma_total']=0
+                        cutn_tem_papeleria = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
 
-                cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-                if cutn_tem_limpieza <= maximo_limpieza:
-                    det_pedido=DetallePedido(
-                        dtl_cantidad=cantidad,
-                        dtl_codigo=codigo,
-                        dtl_descripcion=producto.prod_descripcion,
-                        dtl_precio=producto.prod_precio,
-                        dtl_tipo=producto.prod_tipo,
-                        dtl_creado_por=self.request.user,
-                        dtl_tipo_pedido=2,
-                    )
-                    det_pedido.save()
-                    mensaje='Limpieza OK'
-                    tipo_mensaje=True
-                else:
-                    mensaje='Supera el máximo permitido para Limpieza'
-                    tipo_mensaje=False
+                        if cutn_tem_papeleria <= maximo_papeleria:
+                            det_pedido=DetallePedido(
+                            dtl_cantidad=cantidad,
+                            dtl_codigo=codigo,
+                            dtl_descripcion=producto.prod_descripcion,
+                            dtl_precio=producto.prod_precio,
+                            dtl_tipo=producto.prod_tipo,
+                            dtl_creado_por=self.request.user,
+                            dtl_tipo_pedido=1,
+                            )
+                            det_pedido.save()
+                            mensaje='Papeleria Completado'
+                            tipo_mensaje=True
+                        else:
+                            mensaje='Supera el máximo permitido para papeleria' 
+                            tipo_mensaje=False
 
-            elif tipo_pedido == '3':
-                cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=3, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-                if cuenta_now_limpieza['suma_total'] == None:
-                    cuenta_now_limpieza['suma_total']=0
+                    elif tipo_pedido == '2':
+                        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+                        if cuenta_now_limpieza['suma_total'] == None:
+                            cuenta_now_limpieza['suma_total']=0
 
-                cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-                if cutn_tem_limpieza <= maximo_limpieza_consultorio:
-                    det_pedido=DetallePedido(
-                        dtl_cantidad=cantidad,
-                        dtl_codigo=codigo,
-                        dtl_descripcion=producto.prod_descripcion,
-                        dtl_precio=producto.prod_precio,
-                        dtl_tipo=producto.prod_tipo,
-                        dtl_creado_por=self.request.user,
-                        dtl_tipo_pedido=3,
-                    )
-                    det_pedido.save()
-                    mensaje='Limpieza OK'
-                    tipo_mensaje=True
-                else:
-                    mensaje='Supera el máximo permitido para Limpieza'
-                    tipo_mensaje=False
+                        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+                        if cutn_tem_limpieza <= maximo_limpieza:
+                            det_pedido=DetallePedido(
+                                dtl_cantidad=cantidad,
+                                dtl_codigo=codigo,
+                                dtl_descripcion=producto.prod_descripcion,
+                                dtl_precio=producto.prod_precio,
+                                dtl_tipo=producto.prod_tipo,
+                                dtl_creado_por=self.request.user,
+                                dtl_tipo_pedido=2,
+                            )
+                            det_pedido.save()
+                            mensaje='Limpieza OK'
+                            tipo_mensaje=True
+                        else:
+                            mensaje='Supera el máximo permitido para Limpieza'
+                            tipo_mensaje=False
 
-            elif tipo_pedido == '4':
-                cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=4, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-                if cuenta_now_limpieza['suma_total'] == None:
-                    cuenta_now_limpieza['suma_total']=0
+                    elif tipo_pedido == '3':
+                        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=3, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+                        if cuenta_now_limpieza['suma_total'] == None:
+                            cuenta_now_limpieza['suma_total']=0
 
-                cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-                if cutn_tem_limpieza <= maximo_consumible:
-                    det_pedido=DetallePedido(
-                        dtl_cantidad=cantidad,
-                        dtl_codigo=codigo,
-                        dtl_descripcion=producto.prod_descripcion,
-                        dtl_precio=producto.prod_precio,
-                        dtl_tipo=producto.prod_tipo,
-                        dtl_creado_por=self.request.user,
-                        dtl_tipo_pedido=4,
-                    )
-                    det_pedido.save()
-                    mensaje='Consumible OK'
-                    tipo_mensaje=True
-                else:
-                    mensaje='Supera el máximo permitido para Consumibles' 
-                    tipo_mensaje=False
+                        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+                        if cutn_tem_limpieza <= maximo_limpieza_consultorio:
+                            det_pedido=DetallePedido(
+                                dtl_cantidad=cantidad,
+                                dtl_codigo=codigo,
+                                dtl_descripcion=producto.prod_descripcion,
+                                dtl_precio=producto.prod_precio,
+                                dtl_tipo=producto.prod_tipo,
+                                dtl_creado_por=self.request.user,
+                                dtl_tipo_pedido=3,
+                            )
+                            det_pedido.save()
+                            mensaje='Limpieza OK'
+                            tipo_mensaje=True
+                        else:
+                            mensaje='Supera el máximo permitido para Limpieza'
+                            tipo_mensaje=False
+
+                    elif tipo_pedido == '4':
+                        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=4, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+                        if cuenta_now_limpieza['suma_total'] == None:
+                            cuenta_now_limpieza['suma_total']=0
+
+                        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+                        if cutn_tem_limpieza <= maximo_consumible:
+                            det_pedido=DetallePedido(
+                                dtl_cantidad=cantidad,
+                                dtl_codigo=codigo,
+                                dtl_descripcion=producto.prod_descripcion,
+                                dtl_precio=producto.prod_precio,
+                                dtl_tipo=producto.prod_tipo,
+                                dtl_creado_por=self.request.user,
+                                dtl_tipo_pedido=4,
+                            )
+                            det_pedido.save()
+                            mensaje='Consumible OK'
+                            tipo_mensaje=True
+                        else:
+                            mensaje='Supera el máximo permitido para Consumibles' 
+                            tipo_mensaje=False
 
 
 
