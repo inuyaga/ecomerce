@@ -840,13 +840,22 @@ class pdf_reporte_gen(View):
         headings = ('N° Pedido', 'Fecha Pedido', 'Sucursal', 'Zona', 'Tipo', 'Estatus', 'Total')
         query_result = [(p.ped_id_ped, Paragraph(naturalday(p.ped_fechaCreacion), styles['BodyText']), Paragraph(str(p.ped_id_Suc), styles['BodyText']),Paragraph(str(p.ped_id_Suc.suc_zona), styles['BodyText']), Paragraph(p.get_dtl_tipo_pedido_display(), styles['BodyText']), Paragraph(p.get_ped_estatusPedido_display(), styles['BodyText']),intcomma(p.total_venta())) for p in query_resultado]
         
-       
+        suma_subtotal=0
+        for item in query_resultado:
+            suma_subtotal += item.total_venta()
+
+        suma_subtotal = round(suma_subtotal, 2)
+        IVA = round(suma_subtotal*0.16, 2)
+        TOTAL =  round(suma_subtotal + IVA, 2)
+        row_sub_total=[('','','','','','IVA',Paragraph(intcomma(IVA), styles['BodyText']))]
+        row_sub_total +=[('','','','','','Subtotal',Paragraph(intcomma(suma_subtotal), styles['BodyText']))]
+        row_sub_total +=[('','','','','','TOTAL',Paragraph(intcomma(TOTAL), styles['BodyText']))]
     
             
 
         
 
-        t = Table([headings] + query_result, colWidths=[2 * cm, 4 * cm, 5 * cm, 6 * cm, 4 * cm, 4 * cm, 2 * cm])
+        t = Table([headings] + query_result+row_sub_total, colWidths=[2 * cm, 4 * cm, 5 * cm, 6 * cm, 4 * cm, 4 * cm, 2 * cm])
         t.setStyle(TableStyle(
             [
                 ('GRID', (0, 0), (6, -1), 1, colors.dodgerblue),
