@@ -412,15 +412,14 @@ class DowloadExcelPedido(LoginRequiredMixin, TemplateView):
 class DetallePedidolit(LoginRequiredMixin, TemplateView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
-    template_name = 'pedido/ver_detalle.html' 
+    template_name = 'pedido/ver_detalle.html'  
 
     def get_context_data(self, **kwargs):
         from django.db.models import Sum
         context = super().get_context_data(**kwargs)
         context['usuario'] = self.request.user
         id_pedido = self.kwargs.get('pk')
-        context['articulos'] = DetallePedido.objects.filter(
-            dtl_id_pedido=id_pedido)
+        context['articulos'] = DetallePedido.objects.filter(dtl_id_pedido=id_pedido)
         context['suma_total'] = DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(total= Sum(F('dtl_precio')*F('dtl_cantidad'), output_field=FloatField()))['total']
         context['suma_total_partids'] = DetallePedido.objects.filter(dtl_id_pedido=id_pedido).aggregate(Sum('dtl_cantidad'))
         print(context['suma_total'])
@@ -450,13 +449,57 @@ class DetallePeditoEliminar(DeleteView):
 class DetallePedidoEdit(UpdateView):
     model = DetallePedido
     template_name = 'pedido/conf_create.html'
-    form_class = DetallePedidoFormEdit
+    form_class = DetallePedidoFormEdit 
     success_url = '/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario'] = self.request.user
         return context
+
+    def form_valid(self, form):
+        pedido_id=self.kwargs['pedo_id'] 
+        obj_pedido=Pedido.objects.get(ped_id_ped=pedido_id)  
+        obj_detalle_p=DetallePedido.objects.get(dtl_id_detalle=self.kwargs['pk'])     
+        tipo_ped=obj_detalle_p.dtl_tipo_pedido
+
+        producto_obj = Producto.objects.get(prod_codigo=obj_detalle_p.dtl_codigo)
+
+        limite_credito=0
+        tipo_pedido=''
+        if tipo_ped == 1:
+            # Papeleria
+            tipo_pedido='Papeleria'
+            limite_credito = obj_pedido.ped_id_UsuarioCreo.suc_pertene.suc_monto_papeleria
+        elif tipo_ped == 2:
+            # Limpieza
+            tipo_pedido='Limpieza'
+            limite_credito = obj_pedido.ped_id_UsuarioCreo.suc_pertene.suc_monto_limpieza
+        elif tipo_ped == 3:
+            # Limpieza Consultorio
+            tipo_pedido='Limpieza Consultorio'
+            limite_credito = obj_pedido.ped_id_UsuarioCreo.suc_pertene.suc_monto_limpieza_oficina
+        elif tipo_ped == 4:
+            # Toner
+            tipo_pedido='Toner'
+            limite_credito = obj_pedido.ped_id_UsuarioCreo.suc_pertene.suc_monto_consumible
+        
+        total_ped=DetallePedido.objects.filter(dtl_id_pedido=self.kwargs['pedo_id']).exclude(dtl_id_detalle=self.kwargs['pk']).aggregate(total_venta=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))['total_venta']
+        total_ped = 0 if total_ped == None else total_ped
+
+        cantidad=form.instance.dtl_cantidad
+        subtotal_producto = cantidad * producto_obj.prod_precio
+
+        total = total_ped + subtotal_producto
+
+        if total > limite_credito:
+            messages.warning(self.request, 
+            'Pedido:{} con monto maximo:{} supera el monto con:{} reconsidere actualizar con menos producto o dejar tal cual está.'
+            .format(obj_pedido, limite_credito, total))
+            url = reverse_lazy('pedido:detalle_pedido_update', kwargs={'pk':self.kwargs['pk'], 'pedo_id':self.kwargs['pedo_id']})
+            return redirect(url)
+
+        return super().form_valid(form)
 
     def get_success_url(self):
         slug = self.kwargs['pedo_id']
@@ -730,6 +773,7 @@ class DowloadReport(View):
 
         
         cont = 3
+        sub_total_gobal = 0
         for pedido in ped_list:
             ws.cell(row=cont, column=1).value = pedido['dtl_id_pedido']
             ws.cell(row=cont, column=2).value = str(naturalday(pedido['dtl_id_pedido__ped_fechaCreacion']))
@@ -740,6 +784,8 @@ class DowloadReport(View):
             ws.cell(row=cont, column=7).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
             ws.cell(row=cont, column=8).value = pedido['total_vent']
             ws.cell(row=cont, column=8).number_format = '#,##0'
+
+            sub_total_gobal += pedido['total_vent']
 
             ws.cell(row=cont, column=1).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
             ws.cell(row=cont, column=2).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
@@ -779,6 +825,20 @@ class DowloadReport(View):
                 ws.cell(row=cont, column=7).value = detalle.dtl_precio
                 ws.cell(row=cont, column=8).value = (detalle.dtl_cantidad * detalle.dtl_precio)
                 cont += 1
+        
+        iva = sub_total_gobal*0.16
+        total = sub_total_gobal + iva
+        ws['G{}'.format(cont+1)] = 'Subtotal'
+        ws['H{}'.format(cont+1)] = sub_total_gobal
+        ws.cell(row=cont+1, column=8).number_format = '#,##0.00'
+
+        ws['G{}'.format(cont+2)] = 'IVA'
+        ws['H{}'.format(cont+2)] = iva
+        ws.cell(row=cont+2, column=8).number_format = '#,##0.00'
+
+        ws['G{}'.format(cont+3)] = 'TOTAL'
+        ws['H{}'.format(cont+3)] = total
+        ws.cell(row=cont+3, column=8).number_format = '#,##0.00'
 
 
         dims = {}
@@ -847,8 +907,8 @@ class pdf_reporte_gen(View):
         suma_subtotal = round(suma_subtotal, 2)
         IVA = round(suma_subtotal*0.16, 2)
         TOTAL =  round(suma_subtotal + IVA, 2)
-        row_sub_total=[('','','','','','IVA',Paragraph(intcomma(IVA), styles['BodyText']))]
-        row_sub_total +=[('','','','','','Subtotal',Paragraph(intcomma(suma_subtotal), styles['BodyText']))]
+        row_sub_total =[('','','','','','Subtotal',Paragraph(intcomma(suma_subtotal), styles['BodyText']))]
+        row_sub_total+=[('','','','','','IVA',Paragraph(intcomma(IVA), styles['BodyText']))]
         row_sub_total +=[('','','','','','TOTAL',Paragraph(intcomma(TOTAL), styles['BodyText']))]
     
             

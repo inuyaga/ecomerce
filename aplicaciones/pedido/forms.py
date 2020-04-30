@@ -38,7 +38,7 @@ class DetallePedidoForm(forms.ModelForm):
 class DetallePedidoFormEdit(forms.ModelForm):
     class Meta:
         model = DetallePedido
-        fields = ('dtl_id_pedido','dtl_cantidad')
+        fields = ('dtl_cantidad',)
     def __init__(self, *args, **kwargs):
         super(DetallePedidoFormEdit, self).__init__(*args, **kwargs)
         for field in self.fields:

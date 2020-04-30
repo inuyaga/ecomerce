@@ -214,6 +214,15 @@
         {% endblock menu_desktop %}
         <!-- PAGE CONTENT-->
         <div class="page-content--bgf7">
+            <div class="container">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{message.tags}}{% endif %}" role="alert">
+                    {{ message }}
+                  </div>
+                  {% endfor %}
+                {% endif %}
+            </div>
             {% block contenido %}
 
             {% if usuario.suc_pertene is None %}
