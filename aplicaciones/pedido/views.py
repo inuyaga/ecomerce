@@ -735,7 +735,7 @@ class DowloadReport(View):
         'dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre',
         'dtl_id_pedido__ped_id_UsuarioCreo__username',
         'dtl_id_pedido__dtl_tipo_pedido',
-        'dtl_id_pedido__ped_id_UsuarioAutorizo__username'
+        'dtl_id_pedido__ped_id_UsuarioAutorizo__username',
         'dtl_id_pedido__ped_id_Suc__suc_razon_social',
         ).annotate(total_vent=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
         if tipo_pedido == '0':
