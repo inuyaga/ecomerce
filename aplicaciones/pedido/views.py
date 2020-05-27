@@ -761,7 +761,7 @@ class DowloadReport(View):
         ws['F2'] = 'Tipo'
         ws['G2'] = 'Autorizó'
         ws['H2'] = 'Total'
-        ws['I2'] = 'Total'
+        ws['I2'] = 'Razon Social'
 
         ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
@@ -787,7 +787,7 @@ class DowloadReport(View):
             ws.cell(row=cont, column=7).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
             ws.cell(row=cont, column=8).value = pedido['total_vent']
             ws.cell(row=cont, column=8).number_format = '#,##0'
-            ws.cell(row=cont, column=9).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
+            ws.cell(row=cont, column=9).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_razon_social'])
 
             sub_total_gobal += pedido['total_vent']
 
@@ -799,6 +799,7 @@ class DowloadReport(View):
             ws.cell(row=cont, column=6).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
             ws.cell(row=cont, column=7).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
             ws.cell(row=cont, column=8).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=9).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
             
             cont += 1
             ws['A'+str(cont)] = '##'
