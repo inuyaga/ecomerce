@@ -106,3 +106,4 @@ env_ecomer/
 env_ec/
 media/
 XDG_CACHE_HOME/
+0*.py
