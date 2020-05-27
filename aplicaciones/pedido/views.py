@@ -185,7 +185,7 @@ class ReporteDetallePedido(View):
         from django.contrib.humanize.templatetags.humanize import intcomma
         print ("Genero el PDF")
         response = HttpResponse(content_type='application/pdf')
-        pdf_name = "clientes.pdf"  # llamado clientes
+        
         # la linea 26 es por si deseas descargar el pdf a tu computadora
         # response['Content-Disposition'] = 'attachment; filename=%s' % pdf_name
         buff = BytesIO()
@@ -736,6 +736,7 @@ class DowloadReport(View):
         'dtl_id_pedido__ped_id_UsuarioCreo__username',
         'dtl_id_pedido__dtl_tipo_pedido',
         'dtl_id_pedido__ped_id_UsuarioAutorizo__username'
+        'dtl_id_pedido__ped_id_Suc__suc_razon_social',
         ).annotate(total_vent=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
         if tipo_pedido == '0':
             ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin))
@@ -760,6 +761,7 @@ class DowloadReport(View):
         ws['F2'] = 'Tipo'
         ws['G2'] = 'Autorizó'
         ws['H2'] = 'Total'
+        ws['I2'] = 'Total'
 
         ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
@@ -769,6 +771,7 @@ class DowloadReport(View):
         ws['F2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['G2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['H2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['I2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
 
 
         
@@ -784,6 +787,7 @@ class DowloadReport(View):
             ws.cell(row=cont, column=7).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
             ws.cell(row=cont, column=8).value = pedido['total_vent']
             ws.cell(row=cont, column=8).number_format = '#,##0'
+            ws.cell(row=cont, column=9).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
 
             sub_total_gobal += pedido['total_vent']
 
