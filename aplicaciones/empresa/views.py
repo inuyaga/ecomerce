@@ -65,22 +65,22 @@ class DetallePedidoCreate(TemplateView):
         maximo_consumible=self.request.user.suc_pertene.suc_monto_consumible
 
         producto=Producto.objects.get(prod_codigo=codigo)
-        
-        try:
-            get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
-            mensaje='Solo se puede agregar una pieza 019-068-611' 
-            tipo_mensaje=False
-            if codigo != '019-068-611':
-                mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
-        except ObjectDoesNotExist:
-            if codigo == '019-068-611':
-                if int(cantidad) > 1:
-                    mensaje='Solo se puede agregar una pieza 019-068-611' 
-                    tipo_mensaje=False
-                else:
-                    mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
-            else:    
-                mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        # try:
+        #     get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
+        #     mensaje='Solo se puede agregar una pieza 019-068-611' 
+        #     tipo_mensaje=False
+        #     if codigo != '019-068-611':
+        #         mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        # except ObjectDoesNotExist:
+        #     if codigo == '019-068-611':
+        #         if int(cantidad) > 1:
+        #             mensaje='Solo se puede agregar una pieza 019-068-611' 
+        #             tipo_mensaje=False
+        #         else:
+        #             mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        #     else:    
+        #         mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
 
         json = JsonResponse(
             {
