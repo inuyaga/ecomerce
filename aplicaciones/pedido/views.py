@@ -732,6 +732,7 @@ class DowloadReport(View):
         'dtl_id_pedido', 
         'dtl_id_pedido__ped_fechaCreacion',
         'dtl_id_pedido__ped_id_Suc__suc_nombre',
+        'dtl_id_pedido__ped_id_Suc__suc_cc',
         'dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre',
         'dtl_id_pedido__ped_id_UsuarioCreo__username',
         'dtl_id_pedido__dtl_tipo_pedido',
@@ -756,12 +757,13 @@ class DowloadReport(View):
         ws['A2'] = 'No. Pedido'
         ws['B2'] = 'Fecha Pedido'
         ws['C2'] = 'Sucursal'
-        ws['D2'] = 'Zona'
-        ws['E2'] = 'Usuario'
-        ws['F2'] = 'Tipo'
-        ws['G2'] = 'Autorizó'
-        ws['H2'] = 'Total'
-        ws['I2'] = 'Razon Social'
+        ws['D2'] = 'C.Costo'
+        ws['E2'] = 'Zona'
+        ws['F2'] = 'Usuario'
+        ws['G2'] = 'Tipo'
+        ws['H2'] = 'Autorizó'
+        ws['I2'] = 'Total'
+        ws['J2'] = 'Razon Social'
 
         ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
@@ -772,6 +774,7 @@ class DowloadReport(View):
         ws['G2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['H2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['I2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['J2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
 
 
         
@@ -780,14 +783,15 @@ class DowloadReport(View):
         for pedido in ped_list:
             ws.cell(row=cont, column=1).value = pedido['dtl_id_pedido']
             ws.cell(row=cont, column=2).value = str(naturalday(pedido['dtl_id_pedido__ped_fechaCreacion']))
-            ws.cell(row=cont, column=3).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_nombre'])
-            ws.cell(row=cont, column=4).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre'])
-            ws.cell(row=cont, column=5).value = str(pedido['dtl_id_pedido__ped_id_UsuarioCreo__username'])
-            ws.cell(row=cont, column=6).value = str(TIPO_PEDIDO[pedido['dtl_id_pedido__dtl_tipo_pedido']])
-            ws.cell(row=cont, column=7).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
-            ws.cell(row=cont, column=8).value = pedido['total_vent']
-            ws.cell(row=cont, column=8).number_format = '#,##0'
-            ws.cell(row=cont, column=9).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_razon_social'])
+            ws.cell(row=cont, column=3).value = "{}".format(pedido['dtl_id_pedido__ped_id_Suc__suc_nombre'])
+            ws.cell(row=cont, column=4).value = "{}".format(pedido['dtl_id_pedido__ped_id_Suc__suc_cc'])
+            ws.cell(row=cont, column=5).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre'])
+            ws.cell(row=cont, column=6).value = str(pedido['dtl_id_pedido__ped_id_UsuarioCreo__username'])
+            ws.cell(row=cont, column=7).value = str(TIPO_PEDIDO[pedido['dtl_id_pedido__dtl_tipo_pedido']])
+            ws.cell(row=cont, column=8).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
+            ws.cell(row=cont, column=9).value = pedido['total_vent']
+            ws.cell(row=cont, column=9).number_format = '#,##0'
+            ws.cell(row=cont, column=10).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_razon_social'])
 
             sub_total_gobal += pedido['total_vent']
 
