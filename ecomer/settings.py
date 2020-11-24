@@ -83,9 +83,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'dj_ecomerce',
-        'USER': 'externo',
-        'PASSWORD': '0102261218',
-        'HOST': '192.168.1.228',
+        'USER': 'soporte',
+        'PASSWORD': 'S1st3m45',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }

@@ -33,11 +33,13 @@ function renderiza_pdf(items) {
 
     $.each( items, function( key, value ) {
         txt = `
-        N° Pedido: ${value.ped_id_ped}      N° Pedido Computel:                     N° de Sucursal: ${value.ped_id_Suc__suc_numero} \n
+        N° Pedido: ${value.ped_id_ped}      N° Pedido Computel: \n                    
+        N° de Sucursal: ${value.ped_id_Suc__suc_numero} \n
         Nombre de Sucursal: ${value.ped_id_Suc__suc_nombre} \n
         Dirección de Sucursal: ${value.ped_id_Suc__suc_direccion} \n
         Codigo: ${value.pedido_tipo_insumo} ${codigos[value.pedido_tipo_insumo]}\n
         Informacion de Contacto: Edith Raquel Perera Hdez ext. 1003 \n
+        Zona Referencia ${value.ped_id_Suc__suc_zona_str} \n
         `;
         data={"id":txt}
         arreglo.push(data)

@@ -677,7 +677,8 @@ class GeneraValuesJsonPedidos(View):
                     'ped_id_Suc__suc_numero',
                     'ped_id_Suc__suc_nombre',
                     'ped_id_Suc__suc_direccion',
-                    'pedido_tipo_insumo',
+                    'ped_id_Suc__suc_zona_str',
+                    'pedido_tipo_insumo', 
                 )
                 lista=list(query)
                 data = {
