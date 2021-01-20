@@ -19,7 +19,7 @@ class Sucursal(models.Model):
     suc_direccion=models.CharField('Direccion de sucursal', max_length=250, blank=True, null=True)
     suc_razon_social=models.CharField(verbose_name="Razon Social", max_length=350, blank=True, null=True)
     suc_cc=models.CharField('Centro de Costo', max_length=500, blank=True, null=True)
-    suc_zona_str=models.CharField('Zona sucursal', max_length=255, blank=True, null=True)
+    suc_zona_str=models.CharField('Sucursal Ubictum', max_length=255, blank=True, null=True)
 
 
     def __str__(self):

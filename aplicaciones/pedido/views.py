@@ -739,6 +739,7 @@ class DowloadReport(View):
         'dtl_id_pedido__dtl_tipo_pedido',
         'dtl_id_pedido__ped_id_UsuarioAutorizo__username',
         'dtl_id_pedido__ped_id_Suc__suc_razon_social',
+        'dtl_id_pedido__ped_id_Suc__suc_zona_str',
         ).annotate(total_vent=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
         if tipo_pedido == '0':
             ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin))
@@ -765,6 +766,7 @@ class DowloadReport(View):
         ws['H2'] = 'Autorizó'
         ws['I2'] = 'Total'
         ws['J2'] = 'Razon Social'
+        ws['k2'] = 'Sucursal Ubictum'
 
         ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
@@ -776,6 +778,7 @@ class DowloadReport(View):
         ws['H2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['I2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
         ws['J2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['K2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
 
 
         
@@ -793,6 +796,7 @@ class DowloadReport(View):
             ws.cell(row=cont, column=9).value = pedido['total_vent']
             ws.cell(row=cont, column=9).number_format = '#,##0'
             ws.cell(row=cont, column=10).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_razon_social'])
+            ws.cell(row=cont, column=11).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona_str'])
 
             sub_total_gobal += pedido['total_vent']
 
