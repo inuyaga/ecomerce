@@ -241,7 +241,7 @@ class CarritoLista(LoginRequiredMixin, ListView):
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = DetallePedido
-    template_name = 'pedido/carrito.html'
+    template_name = 'pedido/carrito.html' 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -252,8 +252,8 @@ class CarritoLista(LoginRequiredMixin, ListView):
             dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
         context['ped_lim_sucursal'] = DetallePedido.objects.filter(
             dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
-        context['ped_consumibles'] = DetallePedido.objects.filter(
-            dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4)
+        context['ped_consumibles'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4)
+        context['ped_papeleria_consult'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=5)
 
         return context
 
@@ -322,6 +322,17 @@ class CarritoLista(LoginRequiredMixin, ListView):
             if pedido_count == 0:
                 pedido.save()
                 DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4).update(dtl_status=True, dtl_id_pedido=pedido)
+       
+        if tipo_pedido == 'papeleria_consultorio':
+            pedido = Pedido(
+                ped_id_Suc=self.request.user.suc_pertene,
+                ped_id_UsuarioCreo=self.request.user,
+                dtl_tipo_pedido=5,
+            )
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=5, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=5).update(dtl_status=True, dtl_id_pedido=pedido)
 
         url = reverse_lazy('pedido:carrito')
         return redirect(url)

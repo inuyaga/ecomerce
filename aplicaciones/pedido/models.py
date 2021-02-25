@@ -1,21 +1,22 @@
-from django.db import models
+from django.db import models 
 from django.db.models import Sum, F, FloatField
 from aplicaciones.empresa.models import Sucursal
 from aplicaciones.usuario.models import User
 from django.utils import timezone
-
+TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"), (5,"Papeleria consultorio"))
 class Producto(models.Model): 
     prod_codigo = models.CharField('código del producto', max_length=11, unique=True)
     prod_rutaimg=models.ImageField("imagen", upload_to="imgPrductos/")
     prod_descripcion=models.CharField('Descripción del producto', max_length=400)
     prod_precio=models.FloatField("Precio de producto")
-    TIPOPRODUCTO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"))
-    prod_tipo=models.IntegerField('Tipo de producto', choices=TIPOPRODUCTO)
+    
+    prod_tipo=models.IntegerField('Tipo de producto', choices=TIPO_PEDIDO)
     prod_estado_producto=models.BooleanField("Estatus del producto",default=True)
 
     prod_v_papeleria=models.BooleanField('Visible en papeleria',default=False)
     prod_v_limpieza=models.BooleanField('Visible en Limpieza',default=False)
     prod_v_limpieza_consultorio=models.BooleanField('Visible en Limpieza Consultorio',default=False)
+    prod_v_papeleria_consultorio=models.BooleanField('Visible en papeleria Consultorio',default=False)
     prod_v_consumibles=models.BooleanField('Visible en Toner',default=False)
     def __str__(self):
             return self.prod_codigo
@@ -36,7 +37,7 @@ class Pedido(models.Model):
     ped_pdffac=models.FileField("PDF de factura", upload_to="PdfFAC/", max_length=100,blank=True, null=True)
     ped_xmlfac=models.FileField("XML de factura", upload_to="xmlFAC/", max_length=100,blank=True, null=True)
     ped_fechaSubidaFac=models.DateTimeField("Carga de factura", blank=True, null=True)
-    TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"))
+    
     dtl_tipo_pedido=models.IntegerField(choices=TIPO_PEDIDO, default=0)
     TIPO_INSUMO=((800044556,"Insumos Pedido Mensual"),(800044563,"Papeleria Pedido Mensual"))
     pedido_tipo_insumo=models.IntegerField(choices=TIPO_INSUMO, default=800044556)
@@ -55,8 +56,7 @@ class DetallePedido(models.Model):
     dtl_descripcion=models.CharField('Descripción del producto', max_length=400)
     dtl_precio=models.FloatField("Precio de producto")
     TIPOPRODUCTO=((1,"Papeleria"),(2,"Limpieza"))
-    dtl_tipo=models.IntegerField(choices=TIPOPRODUCTO)
-    TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"))
+    dtl_tipo=models.IntegerField(choices=TIPOPRODUCTO)    
     dtl_tipo_pedido=models.IntegerField(choices=TIPO_PEDIDO, default=0)
     dtl_creado_por = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     dtl_status=models.BooleanField('status', default=False)
