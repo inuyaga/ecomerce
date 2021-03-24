@@ -17,6 +17,7 @@ class Sucursal(models.Model):
     suc_monto_limpieza_oficina=models.FloatField('Monto a comprar limpieza consultorio', default=0)
     suc_monto_consumible=models.FloatField('Monto a comprar consumibles', default=0)
     suc_monto_papeleria_consultorio=models.FloatField('Monto a comprar papeleria consultorio', default=0)
+    suc_monto_toner_consultorio=models.FloatField('Monto a comprar toner consultorio', default=0)
     suc_direccion=models.CharField('Direccion de sucursal', max_length=250, blank=True, null=True)
     suc_razon_social=models.CharField(verbose_name="Razon Social", max_length=350, blank=True, null=True)
     suc_cc=models.CharField('Centro de Costo', max_length=500, blank=True, null=True)

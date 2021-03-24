@@ -64,9 +64,10 @@ class DetallePedidoCreate(TemplateView):
         maximo_limpieza_consultorio=self.request.user.suc_pertene.suc_monto_limpieza_oficina
         maximo_consumible=self.request.user.suc_pertene.suc_monto_consumible
         maximo_papeleria_consultorio=self.request.user.suc_pertene.suc_monto_papeleria_consultorio
+        maximo_toner_consultorio=self.request.user.suc_pertene.suc_monto_toner_consultorio
 
         producto=Producto.objects.get(prod_codigo=codigo)
-        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, self)
+        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, self)
         # try:
         #     get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
         #     mensaje='Solo se puede agregar una pieza 019-068-611' 
@@ -96,7 +97,7 @@ class DetallePedidoCreate(TemplateView):
 
 
 
-def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, self):
+def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, self):
     if tipo_pedido == '1':
         cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
 
@@ -219,6 +220,30 @@ def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_l
             return mensaje, tipo_mensaje
         else:
             mensaje='Supera el máximo permitido para papeleria consultorio' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+    elif tipo_pedido == '6':
+        cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=6, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_papeleria['suma_total'] == None:
+            cuenta_now_papeleria['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_toner_consultorio:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=6,
+            )
+            det_pedido.save()
+            mensaje='Toner consultorio OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para toner consultorio' 
             tipo_mensaje=False
             return mensaje, tipo_mensaje
 
@@ -436,6 +461,12 @@ class PedidoCompraSuc(ListView):
         elif tipo == 5:
             queryset = queryset.filter(prod_v_papeleria_consultorio=True, prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=5, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 6:
+            queryset = queryset.filter(prod_v_toner_consultorio=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=6, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             
             if pedido_count > 0:
                 queryset = Producto.objects.none()

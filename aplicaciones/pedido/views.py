@@ -112,15 +112,19 @@ class ProductoDelete(LoginRequiredMixin, DeleteView):
         return super(ProductoDelete, self).dispatch(*args, **kwargs)
 
 
-class PedidoList(LoginRequiredMixin, ListView):
+class PedidoList(LoginRequiredMixin, ListView): 
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = Pedido
-    template_name = 'pedido/pedido_list.html'
+    template_name = 'pedido/pedido_list.html' 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario'] = self.request.user
+        if self.request.GET:
+            context['form_filtro'] = FiltroForm(self.request.GET)
+        else:
+            context['form_filtro'] = FiltroForm()
         return context
 
     def get_queryset(self): 
@@ -246,14 +250,12 @@ class CarritoLista(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario'] = self.request.user
-        context['ped_papeleria'] = DetallePedido.objects.filter(
-            dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1)
-        context['ped_lim_consultorio'] = DetallePedido.objects.filter(
-            dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
-        context['ped_lim_sucursal'] = DetallePedido.objects.filter(
-            dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
+        context['ped_papeleria'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=1)
+        context['ped_lim_consultorio'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=3)
+        context['ped_lim_sucursal'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=2)
         context['ped_consumibles'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4)
         context['ped_papeleria_consult'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=5)
+        context['ped_toner_consult'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=6)
 
         return context
 
@@ -333,6 +335,16 @@ class CarritoLista(LoginRequiredMixin, ListView):
             if pedido_count == 0:
                 pedido.save()
                 DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=5).update(dtl_status=True, dtl_id_pedido=pedido)
+        if tipo_pedido == 'toner_consultorio':
+            pedido = Pedido(
+                ped_id_Suc=self.request.user.suc_pertene,
+                ped_id_UsuarioCreo=self.request.user,
+                dtl_tipo_pedido=6,
+            )
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=6, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=6).update(dtl_status=True, dtl_id_pedido=pedido)
 
         url = reverse_lazy('pedido:carrito')
         return redirect(url)

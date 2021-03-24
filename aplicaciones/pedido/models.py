@@ -3,7 +3,8 @@ from django.db.models import Sum, F, FloatField
 from aplicaciones.empresa.models import Sucursal
 from aplicaciones.usuario.models import User
 from django.utils import timezone
-TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"), (5,"Papeleria consultorio"))
+TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"), (5,"Papeleria consultorio"), (6, 'Toner consultorio'))
+ESTADOPEDIDO=((1,"Pendiente por autorizar"),(2,"Autorizado"),(3,"Facturado"),(4,"Rechazado"),(5,"Entregado"), (6,"Excel descargado"))
 class Producto(models.Model): 
     prod_codigo = models.CharField('código del producto', max_length=11, unique=True)
     prod_rutaimg=models.ImageField("imagen", upload_to="imgPrductos/")
@@ -18,6 +19,7 @@ class Producto(models.Model):
     prod_v_limpieza_consultorio=models.BooleanField('Visible en Limpieza Consultorio',default=False)
     prod_v_papeleria_consultorio=models.BooleanField('Visible en papeleria Consultorio',default=False)
     prod_v_consumibles=models.BooleanField('Visible en Toner',default=False)
+    prod_v_toner_consultorio=models.BooleanField('Visible en Toner Consultorio',default=False)
     def __str__(self):
             return self.prod_codigo
 
@@ -27,7 +29,7 @@ class Pedido(models.Model):
     ped_fechaCreacion=models.DateField("Fecha de creación", auto_now_add=True)
     ped_fechaAutorizacion= models.DateTimeField("Fecha de autorización",blank=True, null=True)
     ped_fechaCancelacion= models.DateTimeField("Fecha de cancelación",blank=True, null=True) 
-    ESTADOPEDIDO=((1,"Pendiente por autorizar"),(2,"Autorizado"),(3,"Facturado"),(4,"Rechazado"),(5,"Entregado"), (6,"Excel descargado"))
+    
     ped_estatusPedido=models.IntegerField(choices=ESTADOPEDIDO, default=1)
     ped_autorizo_fuera_tiempo=models.BooleanField(default=False)
     ped_id_UsuarioCreo=models.ForeignKey(User, verbose_name="Creador de pedido", related_name='creador', on_delete=models.SET_NULL,blank=True, null=True)

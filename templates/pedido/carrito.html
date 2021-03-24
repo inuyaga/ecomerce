@@ -61,6 +61,13 @@
     <button type="submit" class="btn btn-info">Confirmar pedido Papeleria consultorio!</button>
 </form>
 {% endif %}
+{% if ped_toner_consult  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="toner_consultorio" name="tipo_pedido">
+    <button type="submit" class="btn btn-info">Confirmar pedido Toner consultorio!</button>
+</form>
+{% endif %}
 
 </div>
 {% endblock contenido %}
