@@ -131,9 +131,11 @@ class PedidoList(LoginRequiredMixin, ListView):
 
         queryset = super(PedidoList, self).get_queryset()
         status = self.request.GET.get('status')
-        tipo_pedido = self.request.GET.get('tipo_pedido')
+        tipo_pedido = self.request.GET.getlist('tipo_pedido')
         inicio = self.request.GET.get('inicio')
         fin = self.request.GET.get('fin')        
+
+        
 
         if self.request.user.is_superuser or self.request.user.tipo_user == 2:
             if len(self.request.GET) == 0:
@@ -145,8 +147,8 @@ class PedidoList(LoginRequiredMixin, ListView):
             if inicio !=None and fin != None:
                 queryset=queryset.filter(ped_fechaCreacion__range=(inicio, fin))
             
-            if tipo_pedido != '0':
-                queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+            if tipo_pedido:                
+                queryset = queryset.filter(dtl_tipo_pedido__in=tipo_pedido)
                     
                 
          
@@ -161,8 +163,8 @@ class PedidoList(LoginRequiredMixin, ListView):
             if status != '0':
                 queryset = queryset.filter(ped_estatusPedido=status)
                     
-            if tipo_pedido != '0':
-                queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+            if tipo_pedido:
+                queryset = queryset.filter(dtl_tipo_pedido__in=tipo_pedido)
                     
 
         elif self.request.user.tipo_user == 3:
@@ -175,8 +177,8 @@ class PedidoList(LoginRequiredMixin, ListView):
                 queryset=queryset.filter(ped_fechaCreacion__range=(inicio, fin))
             if status != '0':
                 queryset = queryset.filter(ped_estatusPedido=status)
-            if tipo_pedido != '0':
-                queryset = queryset.filter(dtl_tipo_pedido=tipo_pedido)
+            if tipo_pedido:
+                queryset = queryset.filter(dtl_tipo_pedido__in=tipo_pedido)
                     
 
         
@@ -717,7 +719,7 @@ class GeneraValuesJsonPedidos(View):
                 return JsonResponse(data, status=400)
 
 
-class ReportPedido(TemplateView): 
+class ReportPedido(TemplateView):  
     template_name = 'pedido/report_gen.html'
 
     def get_context_data(self, **kwargs):
@@ -733,16 +735,17 @@ class ReportPedido(TemplateView):
             query = query.filter(dtl_id_pedido__dtl_tipo_pedido=tipo_pedido)
         
         context['obj_list']=query
-                
-            
+
         return context
+                
+                    
 class DowloadReport(View):
     def get(self, request, *args, **kwargs):
         from openpyxl.utils import get_column_letter
         from openpyxl.styles import PatternFill, fills
         import datetime
         from django.contrib.humanize.templatetags.humanize import naturalday
-        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles'}
+        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio'}
         wb = Workbook()
         ws = wb.active
         

@@ -6,7 +6,7 @@ class FiltroForm(forms.Form):
     inicio = forms.DateField(label="Fecha inicio", required=True, widget=forms.DateInput(attrs={'type':'date'}))
     fin = forms.DateField(label="Fecha Final", required=True, widget=forms.DateInput(attrs={'type':'date'})) 
     status = forms.ChoiceField(choices=blank_choice+ESTADOPEDIDO, label="Estatus", required=False, initial='')
-    tipo_pedido = forms.ChoiceField(choices=blank_choice+TIPO_PEDIDO, label="Tipo pedido", required=False,)
+    tipo_pedido = forms.MultipleChoiceField(choices=TIPO_PEDIDO, label="Tipo pedido", required=False)
     def __init__(self, *args, **kwargs):
         super(FiltroForm, self).__init__(*args, **kwargs)
         for field in self.fields:

@@ -30,6 +30,8 @@
               <option value="2" {% if view.request.GET.tipo_pedido == '2' %}selected{% endif %}>Limpieza</option>
               <option value="3" {% if view.request.GET.tipo_pedido == '3' %}selected{% endif %}>Limpieza consultorio</option>
               <option value="4" {% if view.request.GET.tipo_pedido == '4' %}selected{% endif %}>Toner</option>
+              <option value="5" {% if view.request.GET.tipo_pedido == '5' %}selected{% endif %}>Papeleria consultorio</option>
+              <option value="6" {% if view.request.GET.tipo_pedido == '6' %}selected{% endif %}>Toner consultorio</option>
             </select>
           </div>
           <div class="form-group col-sm-3">
@@ -40,7 +42,7 @@
                 <option value="6" {% if '6' in view.request.GET|get_item:'status' %}selected{% endif %}>Excel Descargado</option>
                 <option value="3" {% if '3' in view.request.GET|get_item:'status' %}selected{% endif %}>Facturado</option>
                 <option value="4" {% if '4' in view.request.GET|get_item:'status' %}selected{% endif %}>Rechazado</option>
-                <option value="5" {% if '5' in view.request.GET|get_item:'status' %}selected{% endif %}>Entregado</option>
+                <option value="5" {% if '5' in view.request.GET|get_item:'status' %}selected{% endif %}>Entregado</option> 
   
               </select>            
           </div>
