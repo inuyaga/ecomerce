@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 # Create your views here.
 
 
-class inicio(LoginRequiredMixin, ListView):
+class inicio(LoginRequiredMixin, ListView): 
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = Producto
@@ -65,9 +65,10 @@ class DetallePedidoCreate(TemplateView):
         maximo_consumible=self.request.user.suc_pertene.suc_monto_consumible
         maximo_papeleria_consultorio=self.request.user.suc_pertene.suc_monto_papeleria_consultorio
         maximo_toner_consultorio=self.request.user.suc_pertene.suc_monto_toner_consultorio
+        maximo_globos=self.request.user.suc_pertene.suc_monto_globos
 
         producto=Producto.objects.get(prod_codigo=codigo)
-        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, self)
+        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, self)
         # try:
         #     get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
         #     mensaje='Solo se puede agregar una pieza 019-068-611' 
@@ -97,7 +98,7 @@ class DetallePedidoCreate(TemplateView):
 
 
 
-def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, self):
+def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, self):
     if tipo_pedido == '1':
         cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
 
@@ -244,6 +245,30 @@ def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_l
             return mensaje, tipo_mensaje
         else:
             mensaje='Supera el máximo permitido para toner consultorio' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+    elif tipo_pedido == '7':
+        cuenta_now=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=7, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now['suma_total'] == None:
+            cuenta_now['suma_total']=0
+
+        cutn_tem = cuenta_now['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem <= maximo_globos:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=7,
+            )
+            det_pedido.save()
+            mensaje='Pedido globos OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para pedidos globos' 
             tipo_mensaje=False
             return mensaje, tipo_mensaje
 
@@ -467,6 +492,12 @@ class PedidoCompraSuc(ListView):
         elif tipo == 6:
             queryset = queryset.filter(prod_v_toner_consultorio=True, prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=6, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 7:
+            queryset = queryset.filter(prod_v_globos=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=7, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             
             if pedido_count > 0:
                 queryset = Producto.objects.none()

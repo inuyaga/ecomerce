@@ -3,7 +3,7 @@ from django.db.models import Sum, F, FloatField
 from aplicaciones.empresa.models import Sucursal
 from aplicaciones.usuario.models import User
 from django.utils import timezone
-TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"), (5,"Papeleria consultorio"), (6, 'Toner consultorio'))
+TIPO_PEDIDO=((1,"Papeleria"),(2,"Limpieza"), (3,"Limpieza Consultorio"), (4,"Toner"), (5,"Papeleria consultorio"), (6, 'Toner consultorio'), (7, 'Globos'))
 ESTADOPEDIDO=((1,"Pendiente por autorizar"),(2,"Autorizado"),(3,"Facturado"),(4,"Rechazado"),(5,"Entregado"), (6,"Excel descargado"))
 class Producto(models.Model): 
     prod_codigo = models.CharField('código del producto', max_length=11, unique=True)
@@ -20,6 +20,7 @@ class Producto(models.Model):
     prod_v_papeleria_consultorio=models.BooleanField('Visible en papeleria Consultorio',default=False)
     prod_v_consumibles=models.BooleanField('Visible en Toner',default=False)
     prod_v_toner_consultorio=models.BooleanField('Visible en Toner Consultorio',default=False)
+    prod_v_globos=models.BooleanField('Visible Globos',default=False)
     def __str__(self):
             return self.prod_codigo
 

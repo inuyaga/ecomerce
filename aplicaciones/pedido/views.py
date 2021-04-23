@@ -258,6 +258,7 @@ class CarritoLista(LoginRequiredMixin, ListView):
         context['ped_consumibles'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=4)
         context['ped_papeleria_consult'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=5)
         context['ped_toner_consult'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=6)
+        context['ped_globo'] = DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=7)
 
         return context
 
@@ -347,6 +348,16 @@ class CarritoLista(LoginRequiredMixin, ListView):
             if pedido_count == 0:
                 pedido.save()
                 DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=6).update(dtl_status=True, dtl_id_pedido=pedido)
+        if tipo_pedido == 'ped_globo':
+            pedido = Pedido(
+                ped_id_Suc=self.request.user.suc_pertene,
+                ped_id_UsuarioCreo=self.request.user,
+                dtl_tipo_pedido=7,
+            )
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=7, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count == 0:
+                pedido.save()
+                DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_status=False, dtl_tipo_pedido=7).update(dtl_status=True, dtl_id_pedido=pedido)
 
         url = reverse_lazy('pedido:carrito')
         return redirect(url)
@@ -745,7 +756,7 @@ class DowloadReport(View):
         from openpyxl.styles import PatternFill, fills
         import datetime
         from django.contrib.humanize.templatetags.humanize import naturalday
-        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio'}
+        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio',  7:'Globos'}
         wb = Workbook()
         ws = wb.active
         

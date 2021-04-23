@@ -68,6 +68,13 @@
     <button type="submit" class="btn btn-info">Confirmar pedido Toner consultorio!</button>
 </form>
 {% endif %}
+{% if ped_globo  %}
+<form action="" method="post">
+    {% csrf_token %}
+    <input type="hidden" value="ped_globo" name="tipo_pedido">
+    <button type="submit" class="btn btn-info">Confirmar pedido globo!</button>
+</form>
+{% endif %}
 
 </div>
 {% endblock contenido %}
