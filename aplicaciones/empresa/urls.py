@@ -16,4 +16,6 @@ urlpatterns = [
 
     path('crear/detalle/pedido/', views.DetallePedidoCreate.as_view(), name='detl_pedido_crear'),
 
+    path('crear/pedido/compras/<int:tipo>/', views.PedidoCompraSuc.as_view(), name='detl_compra_suc'),
+
 ]

@@ -1,30 +1,41 @@
 {% extends 'admin/base_ecomer.html'%}
 {% block contenido %}
-<div class="container">
+  <br>
+<form class="form-inline" method="GET">
+  <input type="text" class="form-control mb-2 mr-sm-2" id="buscar" name="buscar" placeholder="Usuario o nombre">
+  <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+  <a class="btn btn-success" href="{% url 'usuarios:list_user' %}" role="button">Todo</a>
+</form>
 
   <a class="btn btn btn-secondary btn-sm" href="{% url 'usuarios:crear_user' %}" role="button">Añadir</a>
   <table class="table">
     <thead class="thead-light">
       <tr>
-        <th scope="col">Usuario</th>
-        <th scope="col">Nombre</th>
-        <th scope="col">Apellido</th>
-        <th scope="col">Correo</th>
-
-        <th scope="col">Activo</th>
-        <th scope="col">Super usuario</th>
-        <th scope="col">Tipo</th>
-        <th scope="col">Sucursal</th>
-        <th scope="col">Zona</th>
+        <th scope="col"><small>Usuario</small></th>
+        <th scope="col"><small>Nombre</small></th>
+        <th scope="col"><small>Apellido</small></th>
+        <th scope="col"><small>Correo</small></th>
+        <th scope="col"><small>Activo</small></th>
+        <th scope="col"><small>Super usuario</small></th>
+        <th scope="col"><small>Tipo</small></th>
+        <th scope="col"><small>Sucursal</small></th>
+        <th scope="col"><small>Zona</small></th>
       </tr>
     </thead>
     <tbody>
       {% for usr in object_list %}
       <tr>
-        <th scope="row"><a href="{% url 'usuarios:user_update' usr.id %}">{{usr.username}}</a></th>
-        <th scope="row">{{usr.first_name}}</th>
-        <th scope="row">{{usr.last_name}}</th>
-        <th scope="row">{{usr.email}}</th>
+        <th scope="row">
+          {% if usuario.is_superuser %}
+          <a href="{% url 'usuarios:user_update' usr.id %}"><small>{{usr.username}}</small></a>
+          {% else %}
+          <a href="{% url 'usuarios:user_update_normal' usr.id %}"><small>{{usr.username}}</small></a>
+          {% endif %}
+
+        </th>
+        <th scope="row"><small>{{usr.first_name}}</small></th>
+        <th scope="row"><small>{{usr.last_name}}</small></th>
+        <th scope="row"><small>{{usr.email}}</small></th>
         <th scope="row">
           {% if usr.is_active %}
           <i class="far fa-thumbs-up"></i>
@@ -39,14 +50,18 @@
           <i class="far fa-thumbs-down"></i>
           {% endif %}
         </th>
-        <th scope="row">{{usr.get_tipo_user_display}}</th>
-        <th scope="row">{{usr.suc_pertene}}</th>
-        <th scope="row">{{usr.zona_pertene}}</th>
+        <th scope="row"><small>{{usr.get_tipo_user_display}}</small></th>
+        <th scope="row"><small>{{usr.suc_pertene}}</small></th>
+        <th scope="row"><small>{{usr.zona_pertene}}</small></th>
+        <th scope="row">
+          {% if perms.usuario.change_user %}
+          <small><a class="btn btn-primary btn-sm" title="Cambiar password" href="{% url 'usuarios:user_update_pass' usr.id %}" role="button"><i class="material-icons"> vpn_key </i></a></small>
+          {% endif %}
+        </th>
       </tr>
       {% endfor %}
 
     </tbody>
   </table>
 
-</div>
   {% endblock contenido %}

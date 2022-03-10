@@ -24,3 +24,17 @@ class UserFormEdit(forms.ModelForm):
         # self.fields['is_superuser'].widget.attrs.update({'class': 'form-check-input'})
         # self.fields['is_staff'].widget.attrs.update({'class': 'form-check-input'})
         # self.fields['is_active'].widget.attrs.update({'class': 'form-check-input'})
+
+class UserFormEditPermNormal(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name','last_name','email','username', 'tipo_user', 'zona_pertene', 'suc_pertene') 
+
+    def __init__(self, *args, **kwargs):
+        super(UserFormEditPermNormal, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['username'].widget.attrs['readonly'] = True
+        # self.fields['is_superuser'].widget.attrs.update({'class': 'form-check-input'})
+        # self.fields['is_staff'].widget.attrs.update({'class': 'form-check-input'})
+        # self.fields['is_active'].widget.attrs.update({'class': 'form-check-input'})

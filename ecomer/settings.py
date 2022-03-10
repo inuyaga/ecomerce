@@ -26,12 +26,13 @@ SECRET_KEY = 'ja-wmggj89q#nq%l76dal_lgo7ui5x^80ltb3ebzb)3n$6v289'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['farmaciaunion.computel.com.mx', 'www.farmaciaunion.computel.com.mx','127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -81,10 +82,13 @@ WSGI_APPLICATION = 'ecomer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecomer',
-        'USER': 'soporte',
-        'PASSWORD': 'S1st3m45',
-        'HOST': 'localhost',
+        'NAME': 'ec_union',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        # 'USER': 'externo',
+        # 'PASSWORD': '0102261218',
+        # 'HOST': '201.163.99.83',
         'PORT': '3306',
     }
 }
@@ -136,3 +140,9 @@ STATICFILES_DIRS = (
 STATIC_ROOT =os.path.join(BASE_DIR, '/static/')
 
 LOGIN_REDIRECT_URL = '/'
+
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'maya.hosting-mexico.net'
+EMAIL_HOST_USER = 'ccs_sistemas@computel.com.mx'
+EMAIL_HOST_PASSWORD = 'S1st3m452019'
+EMAIL_PORT = 465

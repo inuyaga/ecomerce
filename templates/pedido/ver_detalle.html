@@ -1,4 +1,5 @@
 {% extends 'admin/base_ecomer.html'%}
+{% load humanize %}
 {% block contenido %}
 <table class="table table-striped">
   <thead>
@@ -15,8 +16,28 @@
       <th scope="row">{{art.dtl_codigo}}</th>
       <td>{{art.dtl_descripcion}}</td>
       <td>{{art.dtl_cantidad}}</td>
+      <td>
+        {% if perms.pedido.change_detallepedido %}
+        {% if art.dtl_id_pedido.ped_estatusPedido == 1 %}
+        <a class="btn btn-primary" href="{% url 'pedido:detalle_pedido_update' art.dtl_id_detalle art.dtl_id_pedido %}" role="button"><i class="material-icons">edit</i></a>
+        {% endif %}
+        {% endif %}
+        {% if perms.pedido.delete_detallepedido %}
+        
+        {% if art.dtl_id_pedido.ped_estatusPedido == 1 %}
+        <a class="btn btn-danger" href="{% url 'pedido:detalle_pedido_delete' art.dtl_id_detalle art.dtl_id_pedido %}" role="button"><i class="material-icons">delete_forever</i></a>
+        {% endif %}
+
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
+    <tr>
+      <th scope="row"></th>
+      <td></td>
+      <td><strong>Partidas: </strong>{{suma_total_partids.dtl_cantidad__sum}}</td>
+      <td><strong>Total: </strong>{{suma_total|intcomma}}</td>
+    </tr>
 
   </tbody>
 </table>
