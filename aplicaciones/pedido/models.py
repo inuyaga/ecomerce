@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models 
 from django.db.models import Sum, F, FloatField
 from aplicaciones.empresa.models import Sucursal
 from aplicaciones.usuario.models import User
@@ -63,6 +63,10 @@ class Pedido(models.Model):
 
     def __str__(self):
         return str(self.ped_id_ped)
+    
+    def total_venta(self):
+        query=DetallePedido.objects.filter(dtl_id_pedido=self.ped_id_ped).aggregate(total_venta=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
+        return 0 if query['total_venta'] == None else round(query['total_venta'], 3)
 
     def total_venta(self):
         query = DetallePedido.objects.filter(dtl_id_pedido=self.ped_id_ped).aggregate(

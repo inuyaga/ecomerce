@@ -499,6 +499,7 @@ class DetallePedidoEdit(UpdateView):
     success_url = '/'
 
     def get_context_data(self, **kwargs):
+        from django.db.models import Sum
         context = super().get_context_data(**kwargs)
         context['usuario'] = self.request.user
         return context
@@ -1089,3 +1090,303 @@ class EntregaEntregados(LoginRequiredMixin,ListView):
                 queryset = queryset.filter(dtl_tipo_pedido__in=tipo_pedido, ped_entregado=True)
                 
         return queryset
+        context['dell_masivo_list'] = Pedido.objects.filter(
+            ped_estatusPedido=4)
+
+        return context
+
+    @method_decorator(permission_required('pedido.delete_pedido', reverse_lazy('requiere_permisos')))
+    def dispatch(self, *args, **kwargs):
+        return super(PedidoDeleteRechazado, self).dispatch(*args, **kwargs)
+
+
+class GeneraValuesJsonPedidos(View):
+    def post(self, request, *args, **kwargs):
+        import json
+        from datetime import datetime
+        body = json.loads(request.body)
+        inicio = body.get('fecha_inicio')
+        fin =body.get('fecha_fin')
+
+        if inicio == '' or fin == '':
+            data = {
+                'msn': 'Debe de indicar las dos fechas',
+                'status': False,
+            }
+            return JsonResponse(data, status=400)
+        else:
+            inicio = datetime.strptime(body.get('fecha_inicio'), '%Y-%m-%d')
+            fin = datetime.strptime(body.get('fecha_fin'), '%Y-%m-%d')
+            if fin > inicio:
+                query=Pedido.objects.filter(ped_fechaCreacion__range=[inicio, fin]).values(
+                    'ped_id_ped',
+                    'ped_id_Suc__suc_numero',
+                    'ped_id_Suc__suc_nombre',
+                    'ped_id_Suc__suc_direccion',
+                    'ped_id_Suc__suc_zona_str',
+                    'pedido_tipo_insumo', 
+                )
+                lista=list(query)
+                data = {
+                    'obj_list': lista,
+                    'status': True,
+                }
+                return JsonResponse(data)
+            else:
+                data = {
+                    'msn': 'La fecha inicial no puede ser mayor o igual a la fecha final',
+                    'status': False,
+                }
+                return JsonResponse(data, status=400)
+
+
+class ReportPedido(TemplateView):  
+    template_name = 'pedido/report_gen.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        inicio=self.request.GET.get('inicio')
+        fin=self.request.GET.get('fin')
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+
+        query = DetallePedido.objects.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin), dtl_id_pedido__ped_estatusPedido__in=status)
+        if tipo_pedido != '0':
+            query = query.filter(dtl_id_pedido__dtl_tipo_pedido=tipo_pedido)
+        
+        context['obj_list']=query
+
+        return context
+                
+                    
+class DowloadReport(View):
+    def get(self, request, *args, **kwargs):
+        from openpyxl.utils import get_column_letter
+        from openpyxl.styles import PatternFill, fills
+        import datetime
+        from django.contrib.humanize.templatetags.humanize import naturalday
+        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio',  7:'Globos'}
+        wb = Workbook()
+        ws = wb.active
+        
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+        
+        inicio = datetime.datetime.strptime(request.GET.get('inicio'), '%Y-%m-%d').date()
+        fin = datetime.datetime.strptime(request.GET.get('fin'), '%Y-%m-%d').date()
+
+        ped_list = DetallePedido.objects.filter(dtl_id_pedido__ped_estatusPedido__in=status).values(
+        'dtl_id_pedido', 
+        'dtl_id_pedido__ped_fechaCreacion',
+        'dtl_id_pedido__ped_id_Suc__suc_nombre',
+        'dtl_id_pedido__ped_id_Suc__suc_cc',
+        'dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre',
+        'dtl_id_pedido__ped_id_UsuarioCreo__username',
+        'dtl_id_pedido__dtl_tipo_pedido',
+        'dtl_id_pedido__ped_id_UsuarioAutorizo__username',
+        'dtl_id_pedido__ped_id_Suc__suc_razon_social',
+        'dtl_id_pedido__ped_id_Suc__suc_zona_str',
+        ).annotate(total_vent=Sum(F('dtl_cantidad') * F('dtl_precio'), output_field=FloatField()))
+        if tipo_pedido == '0':
+            ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin))
+        else:
+            ped_list=ped_list.filter(dtl_id_pedido__ped_fechaCreacion__range=(inicio, fin), dtl_id_pedido__dtl_tipo_pedido=tipo_pedido)
+        
+
+        ws['A1'] = 'Reporte de Pedidos '+naturalday(inicio)+' al '+naturalday(fin)
+        st = ws['A1']
+        st.font = Font(size=14, b=True, color="004ee0")
+        
+
+        st.alignment = Alignment(horizontal='center')
+        ws.merge_cells('A1:H1')
+        ws.sheet_properties.tabColor = "1072BA"
+
+        ws['A2'] = 'No. Pedido'
+        ws['B2'] = 'Fecha Pedido'
+        ws['C2'] = 'Sucursal'
+        ws['D2'] = 'C.Costo'
+        ws['E2'] = 'Zona'
+        ws['F2'] = 'Usuario'
+        ws['G2'] = 'Tipo'
+        ws['H2'] = 'Autorizó'
+        ws['I2'] = 'Total'
+        ws['J2'] = 'Razon Social'
+        ws['k2'] = 'Sucursal Ubictum'
+
+        ws['A2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['B2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['C2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['D2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['E2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['F2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['G2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['H2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['I2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['J2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+        ws['K2'].fill = PatternFill(start_color='007EDD', end_color='007EDD', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+
+
+        
+        cont = 3
+        sub_total_gobal = 0
+        for pedido in ped_list:
+            ws.cell(row=cont, column=1).value = pedido['dtl_id_pedido']
+            ws.cell(row=cont, column=2).value = str(naturalday(pedido['dtl_id_pedido__ped_fechaCreacion']))
+            ws.cell(row=cont, column=3).value = "{}".format(pedido['dtl_id_pedido__ped_id_Suc__suc_nombre'])
+            ws.cell(row=cont, column=4).value = "{}".format(pedido['dtl_id_pedido__ped_id_Suc__suc_cc'])
+            ws.cell(row=cont, column=5).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona__zona_nombre'])
+            ws.cell(row=cont, column=6).value = str(pedido['dtl_id_pedido__ped_id_UsuarioCreo__username'])
+            ws.cell(row=cont, column=7).value = str(TIPO_PEDIDO[pedido['dtl_id_pedido__dtl_tipo_pedido']])
+            ws.cell(row=cont, column=8).value = str(pedido['dtl_id_pedido__ped_id_UsuarioAutorizo__username'])
+            ws.cell(row=cont, column=9).value = pedido['total_vent']
+            ws.cell(row=cont, column=9).number_format = '#,##0'
+            ws.cell(row=cont, column=10).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_razon_social'])
+            ws.cell(row=cont, column=11).value = str(pedido['dtl_id_pedido__ped_id_Suc__suc_zona_str'])
+
+            sub_total_gobal += pedido['total_vent']
+
+            ws.cell(row=cont, column=1).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=2).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=3).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=4).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=5).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=6).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=7).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=8).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            ws.cell(row=cont, column=9).fill = PatternFill(start_color='007EDD', end_color='39A5F6', fill_type = fills.FILL_PATTERN_LIGHTHORIZONTAL)
+            
+            cont += 1
+            ws['A'+str(cont)] = '##'
+            ws['B'+str(cont)] = 'Sucursal'
+            ws['C'+str(cont)] = 'Zona'
+            ws['D'+str(cont)] = 'Producto'
+            ws['E'+str(cont)] = 'Descripcion'
+            ws['F'+str(cont)] = 'Cantidad'
+            ws['G'+str(cont)] = 'Precio'
+            ws['H'+str(cont)] = 'SubTotal'
+
+            ws['A'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['B'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['C'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['D'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['E'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['F'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['G'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            ws['H'+str(cont)].fill = PatternFill(start_color='FFEE08', end_color='FFEE08', fill_type = 'solid')
+            cont += 1
+            for detalle in DetallePedido.objects.filter(dtl_id_pedido=pedido['dtl_id_pedido']):
+                ws.cell(row=cont, column=1).value = str(detalle.dtl_id_pedido)
+                ws.cell(row=cont, column=2).value = str(detalle.dtl_id_pedido.ped_id_Suc)
+                ws.cell(row=cont, column=3).value = str(detalle.dtl_id_pedido.ped_id_Suc.suc_zona)
+                ws.cell(row=cont, column=4).value = str(detalle.dtl_codigo)
+                ws.cell(row=cont, column=5).value = str(detalle.dtl_descripcion)
+                ws.cell(row=cont, column=6).value = detalle.dtl_cantidad
+                ws.cell(row=cont, column=7).value = detalle.dtl_precio
+                ws.cell(row=cont, column=8).value = (detalle.dtl_cantidad * detalle.dtl_precio)
+                cont += 1
+        
+        iva = sub_total_gobal*0.16
+        total = sub_total_gobal + iva
+        ws['G{}'.format(cont+1)] = 'Subtotal'
+        ws['H{}'.format(cont+1)] = sub_total_gobal
+        ws.cell(row=cont+1, column=8).number_format = '#,##0.00'
+
+        ws['G{}'.format(cont+2)] = 'IVA'
+        ws['H{}'.format(cont+2)] = iva
+        ws.cell(row=cont+2, column=8).number_format = '#,##0.00'
+
+        ws['G{}'.format(cont+3)] = 'TOTAL'
+        ws['H{}'.format(cont+3)] = total
+        ws.cell(row=cont+3, column=8).number_format = '#,##0.00'
+
+
+        dims = {}
+        for row in ws.rows:
+            for cell in row:
+                if cell.value:
+                    if cell.row != 1:
+                        dims[cell.column] = max(
+                            (dims.get(cell.column, 0), len(str(cell.value))))
+
+        for col, value in dims.items():
+            ws.column_dimensions[get_column_letter(col)].width = value+1
+
+        
+        nombre_archivo = 'Reporte_de_Pedidos_'+naturalday(inicio)+'_al_'+naturalday(fin)+'.xls'
+        response = HttpResponse(content_type="application/ms-excel")
+        content = "attachment; filename = {0}".format(nombre_archivo)
+        response['Content-Disposition'] = content
+        wb.save(response)
+        return response
+
+class pdf_reporte_gen(View):
+    def get(self, request, *args, **kwargs):
+        from django.contrib.humanize.templatetags.humanize import intcomma
+        from django.contrib.humanize.templatetags.humanize import naturalday
+        print ("Genero el PDF")
+        response = HttpResponse(content_type='application/pdf')
+        pdf_name = "clientes.pdf"  # llamado clientes
+        # la linea 26 es por si deseas descargar el pdf a tu computadora
+        inicio=self.request.GET.get('inicio')
+        fin=self.request.GET.get('fin')
+        tipo_pedido=self.request.GET.get('tipo_pedido')
+        status=self.request.GET.getlist('status')
+        query_resultado=Pedido.objects.filter(ped_fechaCreacion__range=(inicio, fin), ped_estatusPedido__in=status)
+        if tipo_pedido != '0':
+            query_resultado=query_resultado.filter(dtl_tipo_pedido=tipo_pedido)
+
+
+
+
+
+
+        buff = BytesIO()
+        doc = SimpleDocTemplate(buff,
+                                pagesize=landscape(letter),
+                                rightMargin=40,
+                                leftMargin=40,
+                                topMargin=60,
+                                bottomMargin=18,
+                                )
+        items = []
+        styles = getSampleStyleSheet()
+        
+        
+        header = Paragraph("DETALLE DE PEDIDOS", styles['Heading1'])
+        Paragraph("DETALLE DE PEDIDOS", styles['BodyText'])
+        items.append(header)
+    
+        headings = ('N° Pedido', 'Fecha Pedido', 'Sucursal', 'Zona', 'Tipo', 'Estatus', 'Total')
+        query_result = [(p.ped_id_ped, Paragraph(naturalday(p.ped_fechaCreacion), styles['BodyText']), Paragraph(str(p.ped_id_Suc), styles['BodyText']),Paragraph(str(p.ped_id_Suc.suc_zona), styles['BodyText']), Paragraph(p.get_dtl_tipo_pedido_display(), styles['BodyText']), Paragraph(p.get_ped_estatusPedido_display(), styles['BodyText']),intcomma(p.total_venta())) for p in query_resultado]
+        
+        suma_subtotal=0
+        for item in query_resultado:
+            suma_subtotal += item.total_venta()
+
+        suma_subtotal = round(suma_subtotal, 2)
+        IVA = round(suma_subtotal*0.16, 2)
+        TOTAL =  round(suma_subtotal + IVA, 2)
+        row_sub_total =[('','','','','','Subtotal',Paragraph(intcomma(suma_subtotal), styles['BodyText']))]
+        row_sub_total+=[('','','','','','IVA',Paragraph(intcomma(IVA), styles['BodyText']))]
+        row_sub_total +=[('','','','','','TOTAL',Paragraph(intcomma(TOTAL), styles['BodyText']))]
+    
+            
+
+        
+
+        t = Table([headings] + query_result+row_sub_total, colWidths=[2 * cm, 4 * cm, 5 * cm, 6 * cm, 4 * cm, 4 * cm, 2 * cm])
+        t.setStyle(TableStyle(
+            [
+                ('GRID', (0, 0), (6, -1), 1, colors.dodgerblue),
+                ('LINEBELOW', (0, 0), (-1, 0), 2, colors.darkblue),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.dodgerblue)
+            ]
+        ))
+        items.append(t)
+        doc.build(items)
+        response.write(buff.getvalue())
+        buff.close()
+        return response
+
