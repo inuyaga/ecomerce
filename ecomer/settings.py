@@ -83,18 +83,16 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ec_union',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        # 'USER': 'externo',
-        # 'PASSWORD': '0102261218',
-        # 'HOST': '201.163.99.83',
 
-        # 'NAME': 'dj_ecomerce',
         # 'USER': 'root',
         # 'PASSWORD': '',
-        # 'HOST': 'localhost',
-        # 'PORT': '3306',
+        # 'HOST': '127.0.0.1',
+
+        'USER': 'externo',
+        'PASSWORD': '0102261218',
+        'HOST': '201.163.99.83',
+        'PORT': '3307',
+
     }
 }
 
