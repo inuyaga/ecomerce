@@ -1389,4 +1389,3 @@ class pdf_reporte_gen(View):
         response.write(buff.getvalue())
         buff.close()
         return response
-
