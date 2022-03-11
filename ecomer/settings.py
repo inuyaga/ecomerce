@@ -147,17 +147,14 @@ STATIC_ROOT =os.path.join(BASE_DIR, '/static/')
 
 LOGIN_REDIRECT_URL = '/'
 
-<<<<<<< HEAD
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'maya.hosting-mexico.net'
 EMAIL_HOST_USER = 'ccs_sistemas@computel.com.mx'
 EMAIL_HOST_PASSWORD = 'S1st3m452019'
 EMAIL_PORT = 465
-=======
 
-EMAIL_USE_SSL = True
-EMAIL_HOST = 'maya.hosting-mexico.net'
-EMAIL_HOST_USER = 'soporte@computel.com.mx'
-EMAIL_HOST_PASSWORD = 'S1st3m45ccs'
-EMAIL_PORT = 465
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
+# EMAIL_USE_SSL = True
+# EMAIL_HOST = 'maya.hosting-mexico.net'
+# EMAIL_HOST_USER = 'soporte@computel.com.mx'
+# EMAIL_HOST_PASSWORD = 'S1st3m45ccs'
+# EMAIL_PORT = 465

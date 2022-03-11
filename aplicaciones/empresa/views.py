@@ -7,11 +7,7 @@ from django.urls import reverse_lazy
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
-<<<<<<< HEAD
 from aplicaciones.pedido.models import Producto, DetallePedido, Configuracion_pedido, Pedido, ConfigRestriccion
-=======
-from aplicaciones.pedido.models import Producto, DetallePedido, Configuracion_pedido, Pedido
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
 from aplicaciones.pedido.forms import DetallePedidoForm
 from django.http import JsonResponse
 from django.db.models import Sum, F, Q, FloatField
@@ -70,16 +66,10 @@ class DetallePedidoCreate(TemplateView):
         maximo_papeleria_consultorio=self.request.user.suc_pertene.suc_monto_papeleria_consultorio
         maximo_toner_consultorio=self.request.user.suc_pertene.suc_monto_toner_consultorio
         maximo_globos=self.request.user.suc_pertene.suc_monto_globos
-<<<<<<< HEAD
         maximo_limpieza_oficina=self.request.user.suc_pertene.suc_monto_limpieza_oficina_v
 
         producto=Producto.objects.get(prod_codigo=codigo)
         mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, maximo_limpieza_oficina, self)
-=======
-
-        producto=Producto.objects.get(prod_codigo=codigo)
-        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, self)
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
         # try:
         #     get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
         #     mensaje='Solo se puede agregar una pieza 019-068-611' 
@@ -109,11 +99,7 @@ class DetallePedidoCreate(TemplateView):
 
 
 
-<<<<<<< HEAD
 def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, maximo_limpieza_oficina, self):
-=======
-def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, self):
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
     if tipo_pedido == '1':
         cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
 
@@ -472,10 +458,7 @@ class PedidoCompraSuc(ListView):
     model=Producto
     paginate_by=20 
     template_name='pedido/pedido_limpieza.html'
-<<<<<<< HEAD
 
-=======
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
     def get_context_data(self, **kwargs):
         import datetime
         context = super().get_context_data(**kwargs)
@@ -485,7 +468,6 @@ class PedidoCompraSuc(ListView):
         confs=Configuracion_pedido.objects.all()
         hoy=datetime.datetime.now()
 
-<<<<<<< HEAD
         rangos_fehas = ConfigRestriccion.objects.filter(conf_r_fecha_inicio__lte=hoy, conf_r_fecha_fin__gte=hoy,
                                                         conf_r_tipo_pedido__exact=self.kwargs.get('tipo')).count()
 
@@ -498,13 +480,6 @@ class PedidoCompraSuc(ListView):
 
         return context
 
-=======
-        for config in confs:
-            if config.conf_fecha_inicio <= hoy.date() and config.conf_fecha_fin >= hoy.date():
-                context['comparacion']=True
-
-        return context
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
     def get_queryset(self):
         from datetime import datetime, date 
         import calendar
@@ -560,15 +535,12 @@ class PedidoCompraSuc(ListView):
             
             if pedido_count > 0:
                 queryset = Producto.objects.none()
-<<<<<<< HEAD
         elif tipo == 8:
             queryset = queryset.filter(prod_v_limpieza_oficina=True, prod_estado_producto=True)
             pedido_count=Pedido.objects.filter(dtl_tipo_pedido=8, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
             
             if pedido_count > 0:
                 queryset = Producto.objects.none()
-=======
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
 
         return queryset
 

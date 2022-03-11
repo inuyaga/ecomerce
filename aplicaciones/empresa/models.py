@@ -30,8 +30,5 @@ class Sucursal(models.Model):
             return self.suc_nombre
     class Meta:
             ordering = ('suc_nombre',)
-<<<<<<< HEAD
-=======
 
 
->>>>>>> d0c7bc2272364b1328c755b79ca0818f46ba194e
