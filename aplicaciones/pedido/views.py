@@ -767,9 +767,12 @@ class DowloadReport(View):
         from openpyxl.styles import PatternFill, fills
         import datetime
         from django.contrib.humanize.templatetags.humanize import naturalday
-        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio',  7:'Globos'}
+        TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio',  7:'Globos', 8:'Limpieza oficina'}
         wb = Workbook()
         ws = wb.active
+        # ws = wb.worksheets[0]  proteccion con contraseña para evitar q se edite el reporte. en espera de aprobación 04/04/2022.
+        ws.protection.sheet = True
+        ws.protection.set_password('ComputelAdmin')
         
         tipo_pedido=self.request.GET.get('tipo_pedido')
         status=self.request.GET.getlist('status')
@@ -915,7 +918,7 @@ class DowloadReport(View):
             ws.column_dimensions[get_column_letter(col)].width = value+1
 
         
-        nombre_archivo = 'Reporte_de_Pedidos_'+naturalday(inicio)+'_al_'+naturalday(fin)+'.xls'
+        nombre_archivo = 'Reporte_de_Pedidos_'+naturalday(inicio)+'_al_'+naturalday(fin)+'.xlsx'
         response = HttpResponse(content_type="application/ms-excel")
         content = "attachment; filename = {0}".format(nombre_archivo)
         response['Content-Disposition'] = content
