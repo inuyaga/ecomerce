@@ -6,4 +6,8 @@ openpyxl==2.6.1
 Pillow==5.4.1
 pkg-resources==0.0.0
 pytz==2018.9
+<<<<<<< HEAD
 reporlab==3.6.10
+=======
+reportlab
+>>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd

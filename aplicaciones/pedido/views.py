@@ -770,7 +770,11 @@ class DowloadReport(View):
         TIPO_PEDIDO={0:"Todo", 1:"Papeleria", 2:"Limpieza", 3:"Limpieza Consultorio", 4:'Consumibles', 5:'Papeleria consultorio', 6:'Toner consultorio',  7:'Globos', 8:'Limpieza oficina'}
         wb = Workbook()
         ws = wb.active
+<<<<<<< HEAD
         # ws = wb.worksheets[0]
+=======
+        # ws = wb.worksheets[0]  proteccion con contraseña para evitar q se edite el reporte. en espera de aprobación 04/04/2022.
+>>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd
         ws.protection.sheet = True
         ws.protection.set_password('ComputelAdmin')
         

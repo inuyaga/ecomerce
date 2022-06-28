@@ -24,13 +24,9 @@ MEDIA_URL = '/media/'
 SECRET_KEY = 'ja-wmggj89q#nq%l76dal_lgo7ui5x^80ltb3ebzb)3n$6v289'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-<<<<<<< HEAD
-ALLOWED_HOSTS = ['gruporfp.computel.com.mx', 'www.gruporfp.computel.com.mx','127.0.0.1']
-=======
-ALLOWED_HOSTS = ['farmaciaunion.computel.com.mx', 'www.farmaciaunion.computel.com.mx','127.0.0.1']
->>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd
+ALLOWED_HOSTS = ['www.sanfrancisco.computel.com.mx', 'sanfrancisco.computel.com.mx']
 
 
 # Application definition
@@ -86,27 +82,13 @@ WSGI_APPLICATION = 'ecomer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-<<<<<<< HEAD
-        'NAME': 'ec_gruporfp',
-=======
-        'NAME': 'ec_union',
-
-        # 'USER': 'root',
-        # 'PASSWORD': '',
-        # 'HOST': '127.0.0.1',
-
->>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd
+        'NAME': 'dj_sanfrancisco',
         'USER': 'externo',
         'PASSWORD': '0102261218',
         'HOST': '201.163.99.83',
         'PORT': '3307',
-<<<<<<< HEAD
-=======
-
->>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd
     }
 }
-
 
 
 # Password validation
@@ -157,21 +139,7 @@ STATIC_ROOT =os.path.join(BASE_DIR, '/static/')
 LOGIN_REDIRECT_URL = '/'
 
 EMAIL_USE_SSL = True
-<<<<<<< HEAD
-EMAIL_HOST = 'smtp.live.com'
-EMAIL_HOST_USER = 'ccs_sistemas@hotmail.com'
-EMAIL_HOST_PASSWORD = 'S1stemas2017'
-EMAIL_PORT = 587
-
-=======
 EMAIL_HOST = 'maya.hosting-mexico.net'
 EMAIL_HOST_USER = 'ccs_sistemas@computel.com.mx'
 EMAIL_HOST_PASSWORD = 'S1st3m452019'
 EMAIL_PORT = 465
-
-# EMAIL_USE_SSL = True
-# EMAIL_HOST = 'maya.hosting-mexico.net'
-# EMAIL_HOST_USER = 'soporte@computel.com.mx'
-# EMAIL_HOST_PASSWORD = 'S1st3m45ccs'
-# EMAIL_PORT = 465
->>>>>>> 0af5215e0415eb6262ee32adbd58582987212ffd
