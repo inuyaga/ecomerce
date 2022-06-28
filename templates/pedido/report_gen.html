@@ -1,0 +1,133 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+{% load humanize %} 
+{% load personalizacion_tag %}
+<div class="row">
+  <div class="card col-sm-12">
+    <div class="card-header">
+      Filtrar
+    </div>
+    <div class="card-body">
+
+
+
+      <form>
+        <div class="row">
+          <div class="form-group col-sm-2">
+            <label for="inicio">Fecha Inicio</label>
+            <input type="date" name="inicio" class="form-control" placeholder="Inicio" value="{{view.request.GET.inicio}}" required>
+          </div>
+          <div class="form-group col-sm-2">
+            <label for="fin">Fecha Final</label>
+            <input type="date" name="fin" class="form-control" placeholder="Fin" value="{{view.request.GET.fin}}" required>
+          </div>
+         
+          <div class="form-group col-sm-3">
+            <label for="exampleFormControlSelect1">Tipo Pedido</label>
+            <select class="form-control" id="tipo_pedido" name="tipo_pedido" required>
+              <option value="0" {% if view.request.GET.tipo_pedido == '0' %}selected{% endif %}>Todo</option> 
+              <option value="1" {% if view.request.GET.tipo_pedido == '1' %}selected{% endif %}>Papeleria</option>
+              <option value="2" {% if view.request.GET.tipo_pedido == '2' %}selected{% endif %}>Limpieza</option>
+              <option value="3" {% if view.request.GET.tipo_pedido == '3' %}selected{% endif %}>Limpieza consultorio</option>
+              <option value="4" {% if view.request.GET.tipo_pedido == '4' %}selected{% endif %}>Toner</option>
+              <option value="5" {% if view.request.GET.tipo_pedido == '5' %}selected{% endif %}>Papeleria consultorio</option>
+              <option value="6" {% if view.request.GET.tipo_pedido == '6' %}selected{% endif %}>Toner consultorio</option>
+              <option value="7" {% if view.request.GET.tipo_pedido == '7' %}selected{% endif %}>Globos</option>
+              <option value="8" {% if view.request.GET.tipo_pedido == '8' %}selected{% endif %}>Limpieza oficina</option>
+            </select>
+          </div>
+          <div class="form-group col-sm-3">
+            <label for="exampleFormControlSelect1">Status Pedido</label>
+            <select class="form-control" id="status" name="status" required multiple="multiple"> 
+                <option value="1" {% if '1' in view.request.GET|get_item:'status' %}selected{% endif %}>Pendiente por autorizar</option>
+                <option value="2" {% if '2' in view.request.GET|get_item:'status' %}selected{% endif %}>Autorizado</option>
+                <option value="6" {% if '6' in view.request.GET|get_item:'status' %}selected{% endif %}>Excel Descargado</option>
+                <option value="3" {% if '3' in view.request.GET|get_item:'status' %}selected{% endif %}>Facturado</option>
+                <option value="4" {% if '4' in view.request.GET|get_item:'status' %}selected{% endif %}>Rechazado</option>
+                <option value="5" {% if '5' in view.request.GET|get_item:'status' %}selected{% endif %}>Entregado</option> 
+  
+              </select>            
+          </div>
+          
+          <div class="form-group col-sm-2">
+            <br>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="material-icons">search</i></button>
+            {% if  view.request.GET.tipo_pedido != None %}
+            <a class="btn btn-success btn-sm" target="_blank" href="{% url 'pedido:genera_report_download' %}?{{view.request.GET.urlencode}}" role="button" title="Excel"><i class="material-icons">archive</i></a>
+            <a class="btn btn-secondary btn-sm" target="_blank" href="{% url 'pedido:download_pedido_pdf' %}?{{view.request.GET.urlencode}}" role="button" title="PDF"><i class="material-icons">save_alt</i></a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+
+
+  <div class="container">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col">No. Pedido</th>
+          <th scope="col">Fecha Pedido</th>
+          <th scope="col">Sucursal</th>
+          <th scope="col">Zona</th>
+          <th scope="col">Usuario</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Autorizó</th>
+          <th scope="col">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% regroup obj_list by dtl_id_pedido as reg_list %}
+        {% for item in reg_list %}
+        <tr>
+          <th scope="row">{{item.grouper.ped_id_ped}}</th>
+          <td>{{item.grouper.ped_fechaCreacion}}</td>
+          <td>{{item.grouper.ped_id_Suc}}</td>
+          <td>{{item.grouper.ped_id_Suc.suc_zona}}</td>
+          <td>{{item.grouper.ped_id_UsuarioCreo}}</td>
+          <td>{{item.grouper.get_dtl_tipo_pedido_display}}</td>
+          <td>{{item.grouper.ped_id_UsuarioAutorizo}}</td>
+          <td>{{item.grouper.total_venta|intcomma}}</td>
+        </tr>
+<tr>
+  <td></td>
+<td colspan="6" >
+        <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col"><small>Codigo</small></th>
+                <th scope="col"><small>Descripción</small></th>
+                <th scope="col"><small>Cantidad</small></th>
+                <th scope="col"><small>Precio</small></th>
+                <th scope="col"><small>Subtotal</small></th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for detalle in item.list %}
+              <tr>
+                <th scope="row"><small>{{detalle.dtl_codigo}}</small></th>
+                <td><small>{{detalle.dtl_descripcion}}</small></td>
+                <td><small>{{detalle.dtl_cantidad}}</small></td>
+                <td><small>{{detalle.dtl_precio}}</small></td>
+                <td><small>{{detalle.total}}</small></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+        {% endfor %}
+      </tbody>
+    </table>
+  </td>
+  <td></td>
+  </tr>
+  </div>
+
+
+
+
+
+  {% endblock contenido %}

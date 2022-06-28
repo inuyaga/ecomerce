@@ -7,14 +7,15 @@ from django.urls import reverse_lazy
 from aplicaciones.empresa.eliminaciones import get_deleted_objects
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
-from aplicaciones.pedido.models import Producto, DetallePedido
+from aplicaciones.pedido.models import Producto, DetallePedido, Configuracion_pedido, Pedido, ConfigRestriccion
 from aplicaciones.pedido.forms import DetallePedidoForm
 from django.http import JsonResponse
-from django.db.models import Sum, F, FloatField
+from django.db.models import Sum, F, Q, FloatField
+from django.core.exceptions import ObjectDoesNotExist
 # Create your views here.
 
 
-class inicio(LoginRequiredMixin, ListView):
+class inicio(LoginRequiredMixin, ListView): 
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
     model = Producto
@@ -24,7 +25,21 @@ class inicio(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
+        parametros = self.request.GET.copy()
+        if parametros.get('filtro') != None:
+            context['filtro'] = parametros.get('filtro')
+
         return context
+
+    def get_queryset(self):
+        queryset = super(inicio, self).get_queryset()
+        if self.request.method == 'GET':
+            filtro = self.request.GET.get('filtro')
+            if filtro != None:
+                queryset = queryset.filter(prod_tipo=filtro)
+
+        return queryset
+
 
 
 
@@ -38,6 +53,7 @@ class DetallePedidoCreate(TemplateView):
         # call form.save() for example).
         codigo = request.POST.get('dtl_codigo')
         cantidad = request.POST.get('dtl_cantidad')
+        tipo_pedido = request.POST.get('dtl_tipo_pedido')
 
         mensaje=''
         pedido_conteo=0
@@ -45,71 +61,30 @@ class DetallePedidoCreate(TemplateView):
 
         maximo_papeleria=self.request.user.suc_pertene.suc_monto_papeleria
         maximo_limpieza=self.request.user.suc_pertene.suc_monto_limpieza
+        maximo_limpieza_consultorio=self.request.user.suc_pertene.suc_monto_limpieza_oficina
+        maximo_consumible=self.request.user.suc_pertene.suc_monto_consumible
+        maximo_papeleria_consultorio=self.request.user.suc_pertene.suc_monto_papeleria_consultorio
+        maximo_toner_consultorio=self.request.user.suc_pertene.suc_monto_toner_consultorio
+        maximo_globos=self.request.user.suc_pertene.suc_monto_globos
+        maximo_limpieza_oficina=self.request.user.suc_pertene.suc_monto_limpieza_oficina_v
 
         producto=Producto.objects.get(prod_codigo=codigo)
-
-        if producto.prod_tipo == 1:
-            print('papeleria')
-            # cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user).aggregate(suma_total=Sum(F('dtl_cantidad') * F('dtl_precio')))
-
-            cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-
-            if cuenta_now_papeleria['suma_total'] == None:
-                cuenta_now_papeleria['suma_total']=0
-            cutn_tem_papeleria = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
-
-            if cutn_tem_papeleria <= maximo_papeleria:
-                det_pedido=DetallePedido(
-                dtl_cantidad=cantidad,
-                dtl_codigo=codigo,
-                dtl_descripcion=producto.prod_descripcion,
-                dtl_precio=producto.prod_precio,
-                dtl_tipo=producto.prod_tipo,
-                dtl_creado_por=self.request.user,
-                )
-                det_pedido.save()
-                mensaje='OK'
-                tipo_mensaje=True
-            else:
-                mensaje='Supera el máximo permitido para papeleria'
-                tipo_mensaje=False
-
-        else:
-            cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
-            if cuenta_now_limpieza['suma_total'] == None:
-                cuenta_now_limpieza['suma_total']=0
-            cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
-            if cutn_tem_limpieza <= maximo_limpieza:
-                det_pedido=DetallePedido(
-                    dtl_cantidad=cantidad,
-                    dtl_codigo=codigo,
-                    dtl_descripcion=producto.prod_descripcion,
-                    dtl_precio=producto.prod_precio,
-                    dtl_tipo=producto.prod_tipo,
-                    dtl_creado_por=self.request.user,
-                )
-                det_pedido.save()
-                mensaje='OK'
-                tipo_mensaje=True
-            else:
-                mensaje='Supera el máximo permitido para limpieza'
-                tipo_mensaje=False
-
-
-
-
-        # producto=Producto.objects.get(prod_codigo=codigo)
-
-        # det_pedido=DetallePedido(
-        # dtl_cantidad=cantidad,
-        # dtl_codigo=codigo,
-        # dtl_descripcion=producto.prod_descripcion,
-        # dtl_precio=producto.prod_precio,
-        # dtl_tipo=producto.prod_tipo,
-        # dtl_creado_por=self.request.user,
-        # )
-        # det_pedido.save()
-
+        mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, maximo_limpieza_oficina, self)
+        # try:
+        #     get_gel_baterial = DetallePedido.objects.get(dtl_creado_por=self.request.user, dtl_status=False, dtl_codigo='019-068-611')
+        #     mensaje='Solo se puede agregar una pieza 019-068-611' 
+        #     tipo_mensaje=False
+        #     if codigo != '019-068-611':
+        #         mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        # except ObjectDoesNotExist:
+        #     if codigo == '019-068-611':
+        #         if int(cantidad) > 1:
+        #             mensaje='Solo se puede agregar una pieza 019-068-611' 
+        #             tipo_mensaje=False
+        #         else:
+        #             mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
+        #     else:    
+        #         mensaje, tipo_mensaje=createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, self)
 
         json = JsonResponse(
             {
@@ -123,6 +98,205 @@ class DetallePedidoCreate(TemplateView):
         return json
 
 
+
+def createDetalleVenta(codigo, cantidad, tipo_pedido, maximo_papeleria, maximo_limpieza,  maximo_limpieza_consultorio, maximo_consumible, producto, maximo_papeleria_consultorio, maximo_toner_consultorio, maximo_globos, maximo_limpieza_oficina, self):
+    if tipo_pedido == '1':
+        cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=1,dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+
+        if cuenta_now_papeleria['suma_total'] == None:
+            cuenta_now_papeleria['suma_total']=0
+        cutn_tem_papeleria = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
+
+        if cutn_tem_papeleria <= maximo_papeleria:
+            det_pedido=DetallePedido(
+            dtl_cantidad=cantidad,
+            dtl_codigo=codigo,
+            dtl_descripcion=producto.prod_descripcion,
+            dtl_precio=producto.prod_precio,
+            dtl_tipo=producto.prod_tipo,
+            dtl_creado_por=self.request.user,
+            dtl_tipo_pedido=1,
+            )
+            det_pedido.save()
+            mensaje='Papeleria Completado'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para papeleria' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+
+    elif tipo_pedido == '2':
+        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=2, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_limpieza['suma_total'] == None:
+            cuenta_now_limpieza['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_limpieza:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=2,
+            )
+            det_pedido.save()
+            mensaje='Limpieza OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para Limpieza'
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+
+    elif tipo_pedido == '3':
+        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=3, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_limpieza['suma_total'] == None:
+            cuenta_now_limpieza['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_limpieza_consultorio:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=3,
+            )
+            det_pedido.save()
+            mensaje='Limpieza OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para Limpieza'
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+
+    elif tipo_pedido == '4':
+        cuenta_now_limpieza=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=4, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_limpieza['suma_total'] == None:
+            cuenta_now_limpieza['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_limpieza['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_consumible:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=4,
+            )
+            det_pedido.save()
+            mensaje='Consumible OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para Consumibles' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+    elif tipo_pedido == '5':
+        cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=5, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_papeleria['suma_total'] == None:
+            cuenta_now_papeleria['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_papeleria_consultorio:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=5,
+            )
+            det_pedido.save()
+            mensaje='Papeleria consultorio OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para papeleria consultorio' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+    elif tipo_pedido == '6':
+        cuenta_now_papeleria=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=6, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now_papeleria['suma_total'] == None:
+            cuenta_now_papeleria['suma_total']=0
+
+        cutn_tem_limpieza = cuenta_now_papeleria['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem_limpieza <= maximo_toner_consultorio:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=6,
+            )
+            det_pedido.save()
+            mensaje='Toner consultorio OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para toner consultorio' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+    elif tipo_pedido == '7':
+        cuenta_now=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=7, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now['suma_total'] == None:
+            cuenta_now['suma_total']=0
+
+        cutn_tem = cuenta_now['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem <= maximo_globos:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=7,
+            )
+            det_pedido.save()
+            mensaje='Pedido globos OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para pedidos globos' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
+
+    elif tipo_pedido == '8':
+        cuenta_now=DetallePedido.objects.filter(dtl_creado_por=self.request.user, dtl_tipo_pedido=8, dtl_status=False).aggregate(suma_total=Sum( F('dtl_cantidad')* F('dtl_precio'), output_field=FloatField() ))
+        if cuenta_now['suma_total'] == None:
+            cuenta_now['suma_total']=0
+
+        cutn_tem = cuenta_now['suma_total']+(producto.prod_precio * int(cantidad))
+        if cutn_tem <= maximo_limpieza_oficina:
+            det_pedido=DetallePedido(
+                dtl_cantidad=cantidad,
+                dtl_codigo=codigo,
+                dtl_descripcion=producto.prod_descripcion,
+                dtl_precio=producto.prod_precio,
+                dtl_tipo=producto.prod_tipo,
+                dtl_creado_por=self.request.user,
+                dtl_tipo_pedido=8,
+            )
+            det_pedido.save()
+            mensaje='Pedido de limpieza oficina, OK'
+            tipo_mensaje=True
+            return mensaje, tipo_mensaje
+        else:
+            mensaje='Supera el máximo permitido para pedidos de limpieza oficina' 
+            tipo_mensaje=False
+            return mensaje, tipo_mensaje
 
 class ZonaCreate(LoginRequiredMixin, CreateView):
     login_url = '/login/'
@@ -151,6 +325,13 @@ class ZonaList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    def get_queryset(self):
+        queryset = super(ZonaList, self).get_queryset()
+        busqueda=self.request.GET.get('buscar')
+        if busqueda != None:
+            queryset=queryset.filter(zona_nombre__icontains=busqueda)
+        return queryset
 
     @method_decorator(permission_required('empresa.view_zona',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
@@ -204,6 +385,14 @@ class SucursalList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['usuario']=self.request.user
         return context
+
+    def get_queryset(self):
+        queryset = super(SucursalList, self).get_queryset()
+        busqueda=self.request.GET.get('buscar')
+        if busqueda != None:
+            queryset=queryset.filter(Q(suc_nombre__icontains=busqueda) | Q(suc_zona__zona_nombre__icontains=busqueda))
+        return queryset
+
     @method_decorator(permission_required('empresa.view_sucursal',reverse_lazy('requiere_permisos')))
     def dispatch(self, *args, **kwargs):
                 return super(SucursalList, self).dispatch(*args, **kwargs)
@@ -265,6 +454,94 @@ class SucursalDelete(LoginRequiredMixin, DeleteView):
 
 
 
+class PedidoCompraSuc(ListView):
+    model=Producto
+    paginate_by=20 
+    template_name='pedido/pedido_limpieza.html'
 
+    def get_context_data(self, **kwargs):
+        import datetime
+        context = super().get_context_data(**kwargs)
+        context['usuario']=self.request.user
+        context['comparacion']=False
+        context['conf_fecha']=Configuracion_pedido.objects.all()
+        confs=Configuracion_pedido.objects.all()
+        hoy=datetime.datetime.now()
+
+        rangos_fehas = ConfigRestriccion.objects.filter(conf_r_fecha_inicio__lte=hoy, conf_r_fecha_fin__gte=hoy,
+                                                        conf_r_tipo_pedido__exact=self.kwargs.get('tipo')).count()
+
+        for config in confs:
+            if config.conf_fecha_inicio <= hoy.date() <= config.conf_fecha_fin:
+                context['comparacion'] = True
+
+        if rangos_fehas > 0:
+            context['comparacion'] = False
+
+        return context
+
+    def get_queryset(self):
+        from datetime import datetime, date 
+        import calendar
+        # ESTABLECEMOS LA FECHA ACTUAL
+        today = datetime.now()
+        # CONSULTAMOS CUAL ES EL ULTIMO DIA DEL MES ACTUAL
+        last_day=calendar.monthrange(today.year, today.month)[1]
+        # INICIALIZAMOS LA FECHA INICIAL
+        start_date = datetime(today.year, today.month, 1)
+        # INICIALIZAMOS LA FECHA FINAL
+        end_date = datetime(today.year, today.month, last_day)
+        
+
+        queryset = super(PedidoCompraSuc, self).get_queryset()
+        tipo = self.kwargs['tipo']
+        if tipo == 1:
+            queryset = queryset.filter(prod_v_papeleria=True,prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=1, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 2:
+            queryset = queryset.filter(prod_v_limpieza=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=2, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 3:
+            queryset = queryset.filter(prod_v_limpieza_consultorio=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=3, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 4:
+            queryset = queryset.filter(prod_v_consumibles=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=4, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 5:
+            queryset = queryset.filter(prod_v_papeleria_consultorio=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=5, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 6:
+            queryset = queryset.filter(prod_v_toner_consultorio=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=6, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 7:
+            queryset = queryset.filter(prod_v_globos=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=7, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+        elif tipo == 8:
+            queryset = queryset.filter(prod_v_limpieza_oficina=True, prod_estado_producto=True)
+            pedido_count=Pedido.objects.filter(dtl_tipo_pedido=8, ped_id_Suc=self.request.user.suc_pertene, ped_fechaCreacion__range=(start_date,end_date)).count()
+            
+            if pedido_count > 0:
+                queryset = Producto.objects.none()
+
+        return queryset
 
 

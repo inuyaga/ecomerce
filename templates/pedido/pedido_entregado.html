@@ -1,0 +1,155 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<br>
+{% if messages %}
+<div class="container">
+<div class="row">
+    <ul class="messages">
+        {% for message in messages %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}!
+          </div>
+        {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+<div class="row">
+  <div class="card col-sm-12">
+    <div class="card-header">
+      Filtrar
+    </div>
+    <div class="card-body">
+
+      <form>
+          <div class="row">                        
+            {% for input in form_filtro %}              
+            <div class="form-group col-3">
+              
+              <label for="{{input.name}}">{{input.label}}</label>
+              {{input}}
+              {{input.errors}}
+            </div>
+            {% endfor %}                        
+          <div class="form-group col-3"> 
+              <button type="submit" class="btn btn-primary btn-sm"><i class="material-icons">search</i></button>
+          </div>
+          </div>
+        </form>
+        <!-- <form class="form-inline"> 
+          <div class="row">
+            <div class="col">
+              <select class="form-control" id="status" name="status">
+                <option selected disabled>Estatus pedido</option>
+                <option value="0">Todo</option>
+                <option value="1">Pendiente por autorizar</option>
+                <option value="2">Autorizado</option>
+                <option value="6">Excel Descargado</option>
+                <option value="3">Facturado</option>
+                <option value="4">Rechazado</option>
+                <option value="5">Entregado</option>
+
+              </select>
+            </div>
+            <div class="col">
+              <select class="form-control" id="tipo_pedido" name="tipo_pedido">
+                <option selected disabled>Tipo de pedido</option>
+                <option value="1">Papeleria</option>
+                <option value="2">Limpieza</option>
+                <option value="3">Limpieza consultorio</option>
+              </select>
+            </div>
+            <div class="col">
+              <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+            </div>
+            <div class="col">
+              {% if perms.pedido.delete_pedido  %}
+              <a class="btn btn-danger mb-2" href="{% url 'pedido:listar_pedido_delete' %}"
+                title="Eliminar pedidos rechazados" role="button"><i class="material-icons">delete_forever</i></a>
+              {% endif %}
+            </div>
+          </div>
+        </form> -->
+    </div>
+  </div>
+</div>
+<br>
+
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col"><small>No. Pedido</small></th>
+      <th scope="col"><small>Fecha Pedido</small></th>
+      <th scope="col"><small>fecha Autorización</small></th>
+      <th scope="col"><small>Sucursal</small></th>
+      <th scope="col"><small>Zona</small></th>
+      <th scope="col"><small>Usuario</small></th>
+      <th scope="col"><small>Tipo</small></th>
+      <th scope="col"><small>Autorizó</small></th>
+      <th scope="col"><small>Estatus</small></th>
+      <th scope="col"><small>Factura</small></th>
+      <th scope="col"><small>Fecha entrega</small></th>
+      <th scope="col"><small>Excel</small></th>
+      {% comment %} <th scope="col">Acción</th> {% endcomment %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for dato in object_list%}
+    <tr>
+      <th scope="row"><small>{{ dato.ped_id_ped}}</small></th>
+      <td><small>{{ dato.ped_fechaCreacion}}</small></td>
+      <td><small>{{ dato.ped_fechaAutorizacion}}</small></td>
+      <td><small>{{ dato.ped_id_Suc}}</small></td>
+      <td><small>{{ dato.ped_id_Suc.suc_zona}}</small></td>
+      <td><small>{{ dato.ped_id_UsuarioCreo}}</small></td>
+      <td><small>{{ dato.get_dtl_tipo_pedido_display}}</small></td>
+      <td><small>{{ dato.ped_id_UsuarioAutorizo}}</small></td>
+      <td><small>
+          {% if dato.ped_autorizo_fuera_tiempo %}
+          <span class="badge badge-warning">{{ dato.get_ped_estatusPedido_display}}</span>
+          {% else %}
+          <span
+            class="badge badge-{% if dato.ped_estatusPedido == 1 %}secondary{% endif %}{% if dato.ped_estatusPedido == 2 %}success{% endif %}{% if dato.ped_estatusPedido == 3 %}primary{% endif %}{% if dato.ped_estatusPedido == 4 %}danger{% endif %}{% if dato.ped_estatusPedido == 5 %}dark{% endif %}{% if dato.ped_estatusPedido == 6 %}info{% endif %}">{{ dato.get_ped_estatusPedido_display}}</span>
+          {% endif %}
+        </small></td>
+      <td>
+        {% if dato.ped_estatusPedido == 3 %}
+        <a href="{{dato.ped_pdffac.url}}">PDF</a>
+        <a href="{{dato.ped_xmlfac.url}}">XML</a>
+        {% endif %}
+
+      </td>
+      <td>
+      {% if dato.ped_fechaEntrega is None %}
+        Sin entregar
+      {%else%}
+        {{ dato.ped_fechaEntrega }}
+      {% endif %}
+      </td>
+
+      <td>
+        <a class="btn btn-primary btn-sm" href="{% url 'pedido:detalle_pedido' dato.ped_id_ped  %}?{{view.request.GET.urlencode}}"
+          title="Ver productos" role="button">
+          <i class="material-icons">remove_red_eye</i>
+        </a>
+        <a class="btn btn-primary btn-sm" href="{% url 'pedido:pedido_info' dato.ped_id_ped  %}" title="Info"
+          role="button">
+          <i class="material-icons">info</i>
+        </a>
+      </td>
+      {% comment %} <td><a class="btn btn-danger" href="{% url 'pedido:delete_datailproducto' dato.dtl_id_detalle %}?{{view.request.GET.urlencode}}"
+          role="button">Eliminar</a></td> {% endcomment %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock contenido %}
+{% block script %}
+{% load static %}
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"
+  integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/jspdf-autotable@3.1.1/dist/jspdf.plugin.autotable.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+{% endblock script %}

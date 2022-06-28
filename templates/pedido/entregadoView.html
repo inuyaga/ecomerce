@@ -1,0 +1,33 @@
+{% extends 'admin/base_ecomer.html'%}
+{% block contenido %}
+<div class="container">
+  <br>
+<form class="form-inline" method="GET">
+  <input type="text" class="form-control mb-2 mr-sm-2" id="buscar" name="buscar" placeholder="Nombre Sucursal o Zona">
+
+  <button type="submit" class="btn btn-primary mb-2"><i class="material-icons">search</i></button>
+</form>
+<a class="btn btn-primary mb-2" href="{% url 'empresa:list_sucursales' %}" role="button">Todo</a>
+  <table class="table">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Nombre</th>
+        <th scope="col">Zona</th>
+        <th scope="col">Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for suc in object_list %}
+      <tr>
+        <th scope="row">{{suc.suc_nombre}}</th>
+        <th scope="row">{{suc.suc_zona}}</th>
+        <td>
+          <a class="btn btn-outline-danger" href="{% url 'pedido:act_entrega' suc.suc_id %}" role="button">Marcar pedidos de la sucursal como entregados</a>
+        </td>
+      </tr>
+      {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+{% endblock contenido %}

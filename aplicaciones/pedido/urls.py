@@ -9,15 +9,33 @@ urlpatterns = [
     path('Producto/update/<int:pk>',views.ProductoUpdate.as_view(),name="changue_producto"),
     path('Producto/delete/<int:pk>',views.ProductoDelete.as_view(),name="delete_producto"),
     path('pedido/list/',views.PedidoList.as_view(),name="listar_pedido"),
+    path('pedido/list/delete/',views.PedidoDeleteRechazado.as_view(),name="listar_pedido_delete"), 
     path('Carrito/',views.CarritoLista.as_view(),name="carrito"),
 
     path('delete_datailproducto/<int:pk>/',views.CarritoDelete.as_view(),name="delete_datailproducto"),
     path('descarga_pedido/<int:pk>/',views.DowloadExcelPedido.as_view(),name="descarga_pedido"),
-    path('detalle_pedido/<int:pk>/',views.DetallePedidolit.as_view(),name="detalle_pedido"),
 
-    path('AutorizaPedido/<int:pk>/',views.AutorizarPedido.as_view(),name="auto_pedido"),
+    path('detalle_pedido/<int:pk>/',views.DetallePedidolit.as_view(),name="detalle_pedido"),  
+    path('detalle_pedido/delete/<int:pk>/<int:pedo_id>/',views.DetallePeditoEliminar.as_view(),name="detalle_pedido_delete"),
+    path('detalle_pedido/update/<int:pk>/<int:pedo_id>/',views.DetallePedidoEdit.as_view(),name="detalle_pedido_update"),
+
+    path('AutorizaPedido/<int:pk>/',views.AutorizarPedido.as_view(),name="auto_pedido"), 
     path('RechazaraPedido/<int:pk>/',views.RechazarPedido.as_view(),name="rechaza_pedido"),
     path('pedido_update/<int:pk>/',views.PedidoUpdate.as_view(),name="pedido_update"),
 
     path('informacion_pedido/<int:pk>/',views.PedidoDetalleList.as_view(),name="pedido_info"),
+    path('configuracion/pedido/',views.ConfiguracionList.as_view(),name="configuracion_pedido"),
+    path('configuracion/pedido/create/',views.ConfigCreate.as_view(),name="configuracion_pedido_crea"),
+
+    path('configuracion/pedido/update/<int:pk>/',views.ConfigUpdate.as_view(),name="configuracion_pedido_update"),
+    path('pedidos/genera/pdf/',views.GeneraValuesJsonPedidos.as_view(),name="genera_pdf"),
+
+    path('pedidos/report/',views.ReportPedido.as_view(),name="genera_report"),
+    path('pedidos/report/download/',views.DowloadReport.as_view(),name="genera_report_download"),
+    path('pedidos/download/',views.ReporteDetallePedido.as_view(),name="download_pedido"),
+    path('pedidos/download/pdf/',views.pdf_reporte_gen.as_view(),name="download_pedido_pdf"),
+    
+    path('pedido_entrega/',views.EntregaUpdate.as_view(),name="pedido_entrega"),
+    path('pedidos/entregados/',views.EntregaEntregados.as_view(),name="pedido_lista"),
+    path('actualizar_entrega/<int:pk>/',views.EntregaEntregar.as_view(),name="act_entrega"),
 ]
